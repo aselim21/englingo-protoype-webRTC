@@ -13,7 +13,7 @@
     "nodemon": "^2.0.13"
   },
   "scripts": {
-    "devStart": "nodemon server/server.js",
+    "devStart": "nodemon server/server.js", 
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

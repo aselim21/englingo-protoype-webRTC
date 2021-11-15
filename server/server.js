@@ -17,79 +17,112 @@ const server = require('http').Server(app); //for socket IO
 
 //-------------------------------------Web server
 app.get('/', (req, res) => {
-    res.send("Go to Home");
+  res.send("Go to Home");
 });
 
-app.get('/home', (req, res)=>{
+app.get('/home', (req, res) => {
   res.sendFile(path.join(__dirname, '../src', 'index.html'));
-    //res.redirect(`/room/${uuidv4()}`);
+  //res.redirect(`/room/${uuidv4()}`);
 });
 
-app.get('/room/:roomId', (req,res)=>{
+app.get('/room/:roomId', (req, res) => {
   const roomId = req.params.roomId;
   console.log(roomId);
   res.status(200).send(roomId);
 });
 
-// --------------------------------------Server 2
-app.post('/room', (req,res)=>{
-//   const data = {
-//     userId : the_userId,
-//     topic : e.srcElement.getAttribute('topic'),
-//     offer : the_offer
-// }
-//1. add the Participant to the queue
-Queues.getQueue(req.body.topic).addParticipant({
-  user_id : req.body.userId,
-  offer : req.body.offer
+app.get('/room', (req, res) => {
+  console.log('----------------------Getting room----------------------')
+  const the_topic = req.body.topic;
+  const the_user_id = req.body.userId;
+  Matches.generateMatches(the_topic);
+  // Matches.print();
+  const match_offer = Matches.getMyMatch(the_user_id);
+  res.status(200).send(JSON.stringify(match_offer));
 });
-Queues.getQueue(req.body.topic).print()
-//2. Match him and send him a foreign offer
+app.post('/match', (req, res) => {
+  console.log('----------------------Posting match----------------------')
+  const the_topic = req.body.topic;
+  const the_user_id = req.body.userId;
+  Matches.generateMatches(the_topic);
+  // Matches.print();
+  const match_offer = Matches.getMyMatch(the_user_id);
+  res.status(200).send(JSON.stringify(match_offer));
+});
+// --------------------------------------Server 2
+app.post('/room', (req, res) => {
+  //   const data = {
+  //     userId : the_userId,
+  //     topic : e.srcElement.getAttribute('topic'),
+  //     offer : the_offer
+  // }
+  console.log("-----------------Posting room-----------------")
+  //1. add the Participant to the queue
+  const the_topic = req.body.topic;
+  const the_user_id = req.body.userId;
+  Queues.getQueue(the_topic).addParticipant({
+    user_id: req.body.userId,
+    offer: req.body.offer
+  });
+  Queues.getQueue(the_topic).print();
+  //2. Match him and send him a foreign offer
+  Matches.generateMatches(the_topic);
+  // Matches.print();
+  const match_offer = Matches.getMyMatch(the_user_id);
+  Matches.print();
+  console.log(JSON.stringify(match_offer))
 
-
- // queue.push(req.body);
+  // queue.push(req.body);
   //console.log(req.body);
-//   const new_candidate = new Room(req.body)
-//   new_candidate.save().then((result) => {
-//     console.log("New Room was saved.", result);
-//   }).catch(err => {
-//     console.error("Error saving the New room", err);
+  //   const new_candidate = new Room(req.body)
+  //   new_candidate.save().then((result) => {
+  //     console.log("New Room was saved.", result);
+  //   }).catch(err => {
+  //     console.error("Error saving the New room", err);
 
-// })
-  res.status(200).send();
+  // })
+  res.status(200).send(JSON.stringify(match_offer))
 
 });
 
 // -------------Queues---------------
 const Queue = {
-  topic : '',
-  participants : [],
-  addParticipant : function (new_participant) {
-    this.participants.push(new_participant);
-    return 0;
+  topic: '',
+  participants: [],
+  addParticipant: function (new_participant) {
+    const index = this.participants.findIndex((e) => e.user_id == new_participant.user_id);
+    const userExists = Matches.userAlreadyMatched(new_participant.user_id);
+    if (index > -1 || userExists) {
+      return -1;
+    } else {
+      this.participants.push(new_participant);
+      return 0;
+    }
   },
-  removeParticipant : function (the_user_id){
-    const index = this.participants.findIndex((e)=> e.user_id == the_user_id);
+  removeParticipant: function (the_user_id) {
+    const index = this.participants.findIndex((e) => e.user_id == the_user_id);
     if (index > -1) {
       this.participants.splice(index, 1);
       return 0;
     }
     return -1;
   },
-  print : function(){
+  print: function () {
+    console.log("-------------------QUEUE-------------------")
     console.log(JSON.stringify(this));
   }
 };
 const Queues = {
-  elements : [],
-  addQueue : function (new_queue){
+  elements: [],
+  addQueue: function (new_queue) {
     this.elements.push(new_queue);
   },
-  getQueue : function (the_topic){
-    if(!!this.elements.length) return this.elements.find(e => e.topic == the_topic);
+  getQueue: function (the_topic) {
+    if (!!this.elements.length) return this.elements.find(e => e.topic == the_topic);
     else return -1;
   },
-  print : function(){
+  print: function () {
+    console.log("-------------------QUEUES-------------------")
     console.log(JSON.stringify(this));
   }
 }
@@ -109,75 +142,230 @@ Queues.addQueue(topic2Queue);
 
 //------------End Queues------------
 
-Queues.getQueue('Topic1').addParticipant({
-  user_id : "user1",
-  offer : {
-    type : "offer",
-    sdp : "sdasdasdasdewgregregh"
-  } 
-});
-Queues.getQueue('Topic1').addParticipant({
-  user_id : "user2",
-  offer : {
-    type : "offer",
-    sdp : "sdasdasdasdewgregregh"
-  } 
-});
-Queues.getQueue('Topic1').addParticipant({
-  user_id : "user3",
-  offer : {
-    type : "offer",
-    sdp : "sdasdasdasdewgregregh"
-  } 
-});
-Queues.getQueue('Topic1').print()
+// Queues.getQueue('Topic1').addParticipant({
+//   user_id: "user1",
+//   offer: {
+//     type: "offer",
+//     sdp: "sdasdasdasdewgregregh"
+//   }
+// });
+// Queues.getQueue('Topic1').addParticipant({
+//   user_id: "user2",
+//   offer: {
+//     type: "offer",
+//     sdp: "sdasdasdasdewgregregh"
+//   }
+// });
+// Queues.getQueue('Topic1').addParticipant({
+//   user_id: "user3",
+//   offer: {
+//     type: "offer",
+//     sdp: "sdasdasdasdewgregregh"
+//   }
+// });
+// Queues.getQueue('Topic1').addParticipant({
+//   user_id: "user4",
+//   offer: {
+//     type: "offer",
+//     sdp: "sdasdasdasdewgregregh"
+//   }
+// });
+// Queues.getQueue('Topic1').addParticipant({
+//   user_id: "user5",
+//   offer: {
+//     type: "offer",
+//     sdp: "sdasdasdasdewgregregh"
+//   }
+// });
+// Queues.getQueue('Topic1').addParticipant({
+//   user_id: "user6",
+//   offer: {
+//     type: "offer",
+//     sdp: "sdasdasdasdewgregregh"
+//   }
+// });
+// Queues.getQueue('Topic1').print()
 
 //---------------Mathcing - ---------------
 const Matches = {
-  elements : [], //Macth elements
-  generateMatch : function(the_topic, the_user_id){
-    if(Queues.getQueue(the_topic).participants.length == 1){
+  elements: [], //Macth elements // execute every 5 seconds
+  generateMatches: function (the_topic) {
+    if (Queues.getQueue(the_topic).participants.length == 1) {
       return -1;
-    }else{
+    } else {
+      //TODO with while
 
+      while (Queues.getQueue(the_topic).participants[1]) {
+        //copied
+        const participant1 = Queues.getQueue(the_topic).participants[0];
+        const participant2 = Queues.getQueue(the_topic).participants[1];
+        const new_match = {
+          topic: the_topic,
+          user1_id: participant1.user_id,
+          user1_offer: participant1.offer,
+          user1_connected: false,
+          user2_id: participant2.user_id,
+          user2_offer: participant2.offer,
+          user2_connected: false
+        }
+        console.log(new_match);
+        this.elements.push(new_match);
+        Queues.getQueue(the_topic).removeParticipant(participant1.user_id);
+        Queues.getQueue(the_topic).removeParticipant(participant2.user_id);
+        //taget is the Class,source is the object, i don't need here because there are no functions that i need.
+        // const new_match = Object.assign(Match, match_data); 
+
+      }
     }
   },
-  findMatch: function(user_id){
-    //chech in already generated
-    //
+  getMyMatch: function (the_user_id) {
+    console.log("getting " + the_user_id)
+    if (this.elements.length == 0) return 'no matches';
+    // find which user you are
+    let your_match = 'test';
+    this.elements.every((m) => {
+      if (m.user1_id == the_user_id) {
+        //use the user1 datachannel
+        your_match = {
+          offer : m.user2_offer,
+          use_this_datachannel:false
 
+        }
+        if (m.user2_connected == true) {
+          this.deleteMatch(m.user1_id, m.user2_id);
+        } else {
+          m.user1_connected = true;
+        }
+        return 0;
+      } else
+        if (m.user2_id == the_user_id) {
+          your_match = m.user1_offer;
+          if (m.user1_connected == true) {
+            this.deleteMatch(m.user1_id, m.user2_id);
+          } else {
+            m.user2_connected = true;
+          }
+          return 0;
+        }
+        your_match = "no matches"
+      return -1;
+    });
+    return your_match;
+    // for(let m in this.elements){
+    //   console.log('The elements: ')
+    //   console.log( this.elements)
+
+    //   if(m.user1_id == the_user_id){
+    //     console.log("its  user1")
+    //     const your_match = m.user2_offer;
+    //     if(m.user2_connected == true) {
+    //         this.deleteMatch(m.user1_id, m.user2_id);
+    //     }else{
+    //       m.user1_connected = true;
+    //     }
+    //     return your_match;
+    //   }
+    //   if(m.user2_id == the_user_id){
+    //     const your_match = m.user1_offer;
+    //     if(m.user1_connected == true) {
+    //         this.deleteMatch(m.user1_id, m.user2_id);
+    //     }else{
+    //       m.user2_connected = true;
+    //     }
+    //     return your_match;
+    //   }
+    //==================until here
+    // if(match.user1_id == the_user_id){
+    //   const your_match = match.user2_offer;
+    //   if(match.user2_connected == true) {
+    //       this.deleteMatch(match.user1_id, match.user2_id);
+    //   }else{
+    //     match.user1_connected = true;
+    //   }
+    //   return 0;
+    // }
+    // if(the_user_id == match.user2_id){
+    //   match.user2_connected = true;
+    //   //TODO Delete the match from the table
+    //   return match.user1_offer;
+    // }
+
+  },
+  deleteMatch(the_user1_id, the_user2_id) {
+    const index = this.elements.findIndex((m) => m.user1_id == the_user1_id && m.user2_id == the_user2_id);
+    if (index > -1) {
+      this.elements.splice(index, 1);
+      return 0;
+    }
+    return -1;
+  },
+  userAlreadyMatched(the_user_id){
+    const index = this.elements.findIndex((m) => m.user1_id == the_user_id || m.user2_id == the_user_id);
+    if (index > -1) {
+      return true;
+    }else return false;
+  },
+  print: function () {
+    console.log("-------------------MATCHES-------------------");
+    console.log(JSON.stringify(this));
   }
-
-
-  // let i = 0;
-  // for(i = 0 ; i < Queues.getQueue(the_topic).participants.length; i+2){
-  //   const new_match = {
-  //     user1_id : Queues.getQueue(the_topic).participants[i].user_id
-  //   }
-  //   Object.create(Match);
-  //   new_match.user1_id = Queues.getQueue(the_topic).participants[i].user_id;
-  //   new_match.user1_offer = Queues.getQueue(the_topic).participants[i].offer;
-  //   new_match.user2_id = Queues.getQueue(the_topic).participants[i+1].user_id;
-  //   new_match.user2_offer = Queues.getQueue(the_topic).participants[i+1].offer;
-  //   new_match.topic = Queues.getQueue(the_topic).participants[i].user_id;
-  // }  
-  // for(i in Queues.getQueue(the_topic).participants.length-1){
-
-      
-  //   }
-
-  //   const index1 = getRandomInt(Queues.getQueue(the_topic).participants.length);
-  //   console.log(index1);
-  //   const user1 = Queues.getQueue(the_topic).participants[index1];
-  //   const index2 = getRandomInt(Queues.getQueue(the_topic).participants.length);
-  //   console.log(index2);
-  //   const user2 = Queues.getQueue(the_topic).participants[index1];     
-  // }
 };
+
+function conctantlyGenerateMatches() {
+  // while true()
+
+}
+conctantlyGenerateMatches();
+
+
+// Matches.generateMatches('Topic1');
+// Matches.print();
+
+// console.log(Matches.getMyMatch('user1'));
+// Matches.print();
+// console.log(Matches.getMyMatch('user3'));
+// Matches.print();
+// console.log(Matches.getMyMatch('user4'));
+// Matches.print();
+
+
+
+
+
+
+
+
+
+// let i = 0;
+// for(i = 0 ; i < Queues.getQueue(the_topic).participants.length; i+2){
+//   const new_match = {
+//     user1_id : Queues.getQueue(the_topic).participants[i].user_id
+//   }
+//   Object.create(Match);
+//   new_match.user1_id = Queues.getQueue(the_topic).participants[i].user_id;
+//   new_match.user1_offer = Queues.getQueue(the_topic).participants[i].offer;
+//   new_match.user2_id = Queues.getQueue(the_topic).participants[i+1].user_id;
+//   new_match.user2_offer = Queues.getQueue(the_topic).participants[i+1].offer;
+//   new_match.topic = Queues.getQueue(the_topic).participants[i].user_id;
+// }  
+// for(i in Queues.getQueue(the_topic).participants.length-1){
+
+
+//   }
+
+//   const index1 = getRandomInt(Queues.getQueue(the_topic).participants.length);
+//   console.log(index1);
+//   const user1 = Queues.getQueue(the_topic).participants[index1];
+//   const index2 = getRandomInt(Queues.getQueue(the_topic).participants.length);
+//   console.log(index2);
+//   const user2 = Queues.getQueue(the_topic).participants[index1];     
+// }
+
+
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
-Matches.generateMatch('Topic1');
+
 
 //console.log(getRandomInt(3));
 // expected output: 0, 1 or 2
@@ -189,13 +377,6 @@ Matches.generateMatch('Topic1');
 //user_2_offer
 
 
-const Match = {
-  user1_id : '',
-  user1_offer : '',
-  user2_id : '',
-  user2_offer : '',
-  topic : '',
-}
 // function matchInTopic(the_topic, user_1){
 //   const the_queue = Queues.getQueue(the_topic);
 //   the_queue.participants.get
@@ -244,7 +425,7 @@ const Match = {
 
 // function addTopic(new_topic){
 //   topics.push(new_topic);
-  
+
 // }
 
 // function searchQueue(the_topic){
@@ -253,13 +434,13 @@ const Match = {
 // }
 
 // function matchFromQueue(the_topic){
-  
+
 // }
 
 // io.on('connection', (socket) => { 
 //   console.log("socket is connected");
 //   socket.emit('message', "This is test message from the server socket - emit");
-  
+
 // });
 
 //SOCKET
@@ -285,10 +466,10 @@ const Match = {
 
 //connect with DB and start the server
 mongoose.connect(MongodbURI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then((result) => app.listen(PORT, () => {
-        console.log(`Listening on port ${PORT}...`);
-    }))
-    .catch(err => {
-      console.error(err);
-        res.status(400).json("Error: " + err)
-    });
+  .then((result) => app.listen(PORT, () => {
+    console.log(`Listening on port ${PORT}...`);
+  }))
+  .catch(err => {
+    console.error(err);
+    res.status(400).json("Error: " + err)
+  });
