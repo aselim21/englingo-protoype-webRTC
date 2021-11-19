@@ -43,13 +43,21 @@ async function startMediaSharing() {
         peerConnection.addTrack(track, localStream);
     });
 
-    let remoteStream = new MediaStream();
-    peerConnection.ontrack = function (event) {
-        event.streams[0].getTracks().forEach(track => {
-            remoteStream.addTrack(track);
-        })
+    // let remoteStream = new MediaStream();
+
+    
+    peerConnection.ontrack = function({ streams: [stream] }) {
+    if (remoteVideo) {
+      remoteVideo.srcObject = stream;
     }
-    remoteVideo.srcObject = remoteStream;
+   };
+
+    // peerConnection.ontrack = function (event) {
+    //     event.streams[0].getTracks().forEach(track => {
+    //         remoteStream.addTrack(track);
+    //     })
+    // }
+    // remoteVideo.srcObject = remoteStream;
 }
 startMediaSharing();
 
