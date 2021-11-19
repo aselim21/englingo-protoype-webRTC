@@ -9,7 +9,8 @@ headers.append('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS,
 // const serverURL_rooms = 'http://localhost:3000';
 const the_match_id = window.location.pathname.slice(6);
 const the_userId = window.localStorage.userId;
-const configuration = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] }
+const configuration = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] , offerToReceiveAudio: true,
+offerToReceiveVideo: true }
 const peerConnection = new RTCPeerConnection(configuration);
 peerConnection.onconnectionstatechange = function(event) {
     console.log('State changed ' + peerConnection.connectionState);
@@ -40,8 +41,11 @@ localVideo.addEventListener('loadedmetadata', function() {
 async function startMediaSharing() {
     console.log("startMediaSharing")
     //HTML elements
-   
-    const constraints = { audio: false, video: true };
+    // var constraints = {
+    //     offerToReceiveAudio: true,
+    //     offerToReceiveVideo: true
+    //     }
+    const constraints = { audio: true, video: true };
     //streams
     let localStream = await navigator.mediaDevices.getUserMedia(constraints);
     localVideo.srcObject = localStream;
