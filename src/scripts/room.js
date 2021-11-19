@@ -1,4 +1,11 @@
 const serverURL_rooms = 'https://webrtc-englingo.herokuapp.com';
+const headers = new Headers();
+headers.append('Content-Type', 'application/json');
+headers.append('Accept', 'application/json');
+headers.append("Access-Control-Allow-Credentials", "true");
+headers.append("Access-Control-Allow-Headers", 'Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Credentials, Cookie, Set-Cookie, Authorization');
+headers.append('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS, HEAD');
+
 // const serverURL_rooms = 'http://localhost:3000';
 const the_match_id = window.location.pathname.slice(6);
 const the_userId = window.localStorage.userId;
@@ -51,13 +58,14 @@ startMediaSharing();
 async function getMyMatchInfo() {
     const response = await fetch(`${serverURL_rooms}/match/${the_match_id}`, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
-        mode: 'no-cors', // no-cors, *cors, same-origin
+        //mode: 'no-cors', // no-cors, *cors, same-origin
         //cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
         //credentials: 'same-origin', // include, *same-origin, omit
         // headers: {
         //     'Content-Type': 'application/json'
         //     // 'Content-Type': 'application/x-www-form-urlencoded',
         // },
+        headers: headers,
         //redirect: 'follow', // manual, *follow, error
         //referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
         // body: JSON.stringify(data) // body data type must match "Content-Type" header
@@ -179,13 +187,14 @@ async function createAnswerAndConnect_user2(offer, callback) {
 async function updateMatchInfo(data) {
     const response = await fetch(`${serverURL_rooms}/match/${the_match_id}`, {
         method: 'PUT', // *GET, POST, PUT, DELETE, etc.
-        mode: 'no-cors', // no-cors, *cors, same-origin
+        //mode: 'no-cors', // no-cors, *cors, same-origin
         //cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
         //credentials: 'same-origin', // include, *same-origin, omit
-        headers: {
-            'Content-Type': 'application/json'
-            // 'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        // headers: {
+        //     'Content-Type': 'application/json'
+        //     // 'Content-Type': 'application/x-www-form-urlencoded',
+        // },
+        headers: headers,
         //redirect: 'follow', // manual, *follow, error
         //referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
         body: JSON.stringify(data) // body data type must match "Content-Type" header
@@ -196,13 +205,14 @@ async function updateMatchInfo(data) {
 async function deleteMatchInfo() {
     const response = await fetch(`${serverURL_rooms}/match/${the_match_id}`, {
         method: 'DELETE', // *GET, POST, PUT, DELETE, etc.
-        mode: 'no-cors', // no-cors, *cors, same-origin
+        //mode: 'no-cors', // no-cors, *cors, same-origin
         //cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
         //credentials: 'same-origin', // include, *same-origin, omit
         // headers: {
         //     'Content-Type': 'application/json'
         //     // 'Content-Type': 'application/x-www-form-urlencoded',
         // },
+        headers: headers,
         //redirect: 'follow', // manual, *follow, error
         //referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
         //body: JSON.stringify(data) // body data type must match "Content-Type" header
