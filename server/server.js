@@ -15,6 +15,29 @@ const server = require('http').Server(app); //for socket IO
 //creates a socket io based on our server
 //The server is for setting the rooms; if you shut down the server, the videos are still going to be transmitted
 
+app.use((req, res, next) => {
+  // const corsWhitelist = [
+  //     'http://127.0.0.1:5500',
+  //     'http://127.0.0.1:5501',
+  //     'http://127.0.0.1:3000',
+  //     'http://127.0.0.1:3001',
+  //     'https://enki-bookstore.herokuapp.com',
+  //     'https://enki-product.herokuapp.com',
+  //     'https://enki-store.herokuapp.com',
+  //     'https://enki-cart.herokuapp.com',
+  //     'https://enki-user-dev.herokuapp.com'
+  // ];
+  // if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
+  //     res.header('Access-Control-Allow-Origin', req.headers.origin);
+  // }
+  // res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Credentials, Cookie, Set-Cookie, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS, HEAD');
+  //res.header('Access-Control-Request-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Credentials ');
+  next();
+});
+
 //-------------------------------------Web server
 app.get('/', (req, res) => {
   res.send("Go to Home");

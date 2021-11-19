@@ -1,5 +1,6 @@
 
-const serverURL_rooms = 'http://localhost:3000';
+// const serverURL_rooms = 'http://localhost:3000';
+const serverURL_rooms = 'https://webrtc-englingo.herokuapp.com';
 window.addEventListener('DOMContentLoaded', (event) => {
     console.log('DOM fully loaded and parsed');
 });
@@ -40,7 +41,7 @@ async function createMatch_request(data) {
 
     const response = await fetch(`${serverURL_rooms}/match`, {
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
-        //mode: 'cors', // no-cors, *cors, same-origin
+        mode: 'no-cors', // no-cors, *cors, same-origin
         //cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
         //credentials: 'same-origin', // include, *same-origin, omit
         headers: {
