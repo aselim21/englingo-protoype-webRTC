@@ -24,31 +24,79 @@ app.get('/home', (req, res) => {
   res.sendFile(path.join(__dirname, '../src', 'index.html'));
   //res.redirect(`/room/${uuidv4()}`);
 });
+app.get('/room', (req, res) => {
+  res.sendFile(path.join(__dirname, '../src', 'room.html'));
+  //res.redirect(`/room/${uuidv4()}`);
+});
 
 app.get('/room/:roomId', (req, res) => {
-  const roomId = req.params.roomId;
-  console.log(roomId);
-  res.status(200).send(roomId);
+  res.sendFile(path.join(__dirname, '../src', 'room.html'));
 });
 
-app.get('/room', (req, res) => {
-  console.log('----------------------Getting room----------------------')
-  const the_topic = req.body.topic;
-  const the_user_id = req.body.userId;
-  Matches.generateMatches(the_topic);
-  // Matches.print();
-  const match_offer = Matches.getMyMatch(the_user_id);
-  res.status(200).send(JSON.stringify(match_offer));
+//MATCHES--------------------------------------------------------------------------------------------
+app.get('/match/:matchId', (req, res) => {
+  console.log('reading match info')
+  const matchId = req.params.matchId;
+  const the_match = Matches.getMatchInfo(matchId);
+  console.log(the_match)
+  res.status(200).send(JSON.stringify(the_match));
 });
+
+app.put('/match/:matchId', (req, res) => {
+  console.log("----------------------PUTing Match----------------------------------------------------")
+  const matchId = req.params.matchId;
+  let result;
+  console.log(req.body)
+  if(req.body.user1_offer){
+    console.log("Its offer");
+    result = Matches.updateMatchOffer(matchId, req.body);
+    console.log("In the Put Function" + JSON.stringify(result));
+  }else if(req.body.user2_answer) {
+    console.log("Its answer");
+    result = Matches.updateMatchAnswer(matchId, req.body)
+  }else if(req.body.connection_completed) {
+    console.log("Its answer");
+    result = Matches.updateConnectionCompleted(matchId, req.body)
+  }
+
+  res.status(200).send(JSON.stringify(result));
+});
+
+
 app.post('/match', (req, res) => {
-  console.log('----------------------Posting match----------------------')
+  console.log('----------------------POSTing match----------------------')
   const the_topic = req.body.topic;
   const the_user_id = req.body.userId;
-  Matches.generateMatches(the_topic);
-  // Matches.print();
+  Queues.getQueue(the_topic).addParticipant({
+    user_id: req.body.userId
+  });
+  const the_match_id = Matches.findMyMatchID(the_user_id);
+  Matches.print();
+  res.status(200).send(JSON.stringify(the_match_id));
+});
+
+app.delete('/match/:matchId', (req, res) => {
+  console.log('----------------------Deleting match----------------------');
+  const matchId = req.params.matchId;
+ 
+  Matches.deleteMatch(matchId);
+
+  Matches.print();
+  res.status(200).send({});
+});
+//MATCHES--------------------------------------------------------------------------------------------
+app.get('/match', (req, res) => {
+  console.log('----------------------GETTing match----------------------')
+  const the_topic = req.body.topic;
+  const the_user_id = req.body.userId;
+  Queues.getQueue(the_topic).addParticipant({
+    user_id: req.body.userId
+  });
   const match_offer = Matches.getMyMatch(the_user_id);
+  Matches.print();
   res.status(200).send(JSON.stringify(match_offer));
 });
+
 // --------------------------------------Server 2
 app.post('/room', (req, res) => {
   //   const data = {
@@ -118,7 +166,7 @@ const Queues = {
     this.elements.push(new_queue);
   },
   getQueue: function (the_topic) {
-    if (!!this.elements.length) return this.elements.find(e => e.topic == the_topic);
+    if (this.elements.length > -1) return this.elements.find(e => e.topic == the_topic);
     else return -1;
   },
   print: function () {
@@ -139,6 +187,13 @@ topic2Queue.participants = [];
 Queues.addQueue(topic1Queue);
 Queues.addQueue(topic2Queue);
 
+function constantlyGenerateMatches(the_topic){
+  setTimeout(function () {
+    Matches.generateMatches(the_topic);
+    constantlyGenerateMatches(the_topic);
+    }, 5000);
+}
+constantlyGenerateMatches('Topic1');
 
 //------------End Queues------------
 
@@ -190,116 +245,118 @@ Queues.addQueue(topic2Queue);
 const Matches = {
   elements: [], //Macth elements // execute every 5 seconds
   generateMatches: function (the_topic) {
+    console.log(Queues.getQueue(the_topic))
     if (Queues.getQueue(the_topic).participants.length == 1) {
       return -1;
-    } else {
-      //TODO with while
-
+    } 
+    else {
       while (Queues.getQueue(the_topic).participants[1]) {
         //copied
         const participant1 = Queues.getQueue(the_topic).participants[0];
         const participant2 = Queues.getQueue(the_topic).participants[1];
         const new_match = {
+          match_id : uuidv4(),
           topic: the_topic,
           user1_id: participant1.user_id,
-          user1_offer: participant1.offer,
-          user1_connected: false,
+          user1_offer: null,
           user2_id: participant2.user_id,
-          user2_offer: participant2.offer,
-          user2_connected: false
+          user2_answer: null,
+          connection_completed: false
         }
         console.log(new_match);
         this.elements.push(new_match);
         Queues.getQueue(the_topic).removeParticipant(participant1.user_id);
         Queues.getQueue(the_topic).removeParticipant(participant2.user_id);
-        //taget is the Class,source is the object, i don't need here because there are no functions that i need.
-        // const new_match = Object.assign(Match, match_data); 
-
       }
     }
   },
-  getMyMatch: function (the_user_id) {
-    console.log("getting " + the_user_id)
-    if (this.elements.length == 0) return 'no matches';
-    // find which user you are
-    let your_match = 'test';
-    this.elements.every((m) => {
-      if (m.user1_id == the_user_id) {
-        //use the user1 datachannel
-        your_match = {
-          offer : m.user2_offer,
-          use_this_datachannel:false
+  findMyMatchID: function (the_user_id) {
+    console.log("find match ID for user " + the_user_id);
+    const index = this.elements.findIndex((m) => m.user1_id == the_user_id || m.user2_id == the_user_id);
+    if (index > -1) {
+      return this.elements[index].match_id;
+    }else return 'no match';
 
-        }
-        if (m.user2_connected == true) {
-          this.deleteMatch(m.user1_id, m.user2_id);
-        } else {
-          m.user1_connected = true;
-        }
-        return 0;
-      } else
-        if (m.user2_id == the_user_id) {
-          your_match = m.user1_offer;
-          if (m.user1_connected == true) {
-            this.deleteMatch(m.user1_id, m.user2_id);
-          } else {
-            m.user2_connected = true;
-          }
-          return 0;
-        }
-        your_match = "no matches"
-      return -1;
-    });
-    return your_match;
-    // for(let m in this.elements){
-    //   console.log('The elements: ')
-    //   console.log( this.elements)
-
-    //   if(m.user1_id == the_user_id){
-    //     console.log("its  user1")
-    //     const your_match = m.user2_offer;
-    //     if(m.user2_connected == true) {
-    //         this.deleteMatch(m.user1_id, m.user2_id);
-    //     }else{
+    // if (this.elements.length == 0) return 'no matches';
+    // // find which user you are
+    // let your_match = 'test';
+    // this.elements.every((m) => {
+    //   if (m.user1_id == the_user_id) {
+    //     //use the user1 datachannel
+    //     your_match = {
+    //       offer : m.user2_offer,
+    //       use_this_datachannel:false
+    //     }
+    //     if (m.user2_connected == true) {
+    //       this.deleteMatch(m.user1_id, m.user2_id);
+    //     } else {
     //       m.user1_connected = true;
     //     }
-    //     return your_match;
-    //   }
-    //   if(m.user2_id == the_user_id){
-    //     const your_match = m.user1_offer;
-    //     if(m.user1_connected == true) {
+    //     return 0;
+    //   } else
+    //     if (m.user2_id == the_user_id) {
+    //       your_match = m.user1_offer;
+    //       if (m.user1_connected == true) {
     //         this.deleteMatch(m.user1_id, m.user2_id);
-    //     }else{
-    //       m.user2_connected = true;
+    //       } else {
+    //         m.user2_connected = true;
+    //       }
+    //       return 0;
     //     }
-    //     return your_match;
-    //   }
-    //==================until here
-    // if(match.user1_id == the_user_id){
-    //   const your_match = match.user2_offer;
-    //   if(match.user2_connected == true) {
-    //       this.deleteMatch(match.user1_id, match.user2_id);
-    //   }else{
-    //     match.user1_connected = true;
-    //   }
-    //   return 0;
-    // }
-    // if(the_user_id == match.user2_id){
-    //   match.user2_connected = true;
-    //   //TODO Delete the match from the table
-    //   return match.user1_offer;
-    // }
+    //     your_match = "no matches"
+    //   return -1;
+    // });
+    // return your_match;
+    
 
   },
-  deleteMatch(the_user1_id, the_user2_id) {
-    const index = this.elements.findIndex((m) => m.user1_id == the_user1_id && m.user2_id == the_user2_id);
+  getMatchInfo: function(the_match_id){
+    const index = this.elements.findIndex((m) => m.match_id == the_match_id);
     if (index > -1) {
-      this.elements.splice(index, 1);
-      return 0;
+      return this.elements[index];
     }
     return -1;
   },
-  userAlreadyMatched(the_user_id){
+  updateMatchOffer:function(the_match_id, data){
+    const index = this.elements.findIndex((m) => m.match_id == the_match_id);
+    console.log(this.elements[index]);
+    if (index > -1) {
+      this.elements[index].user1_offer = data.user1_offer;
+      console.log(this.elements[index])
+      return this.elements[index];
+    }
+    return -1;
+  }, 
+  updateMatchAnswer:function(the_match_id, data){
+    console.log('updating match answer')
+    const index = this.elements.findIndex((m) => m.match_id == the_match_id);
+    if (index > -1) {
+      this.elements[index].user2_answer = data.user2_answer;
+      console.log(this.elements[index]);
+      return this.elements[index];
+    }
+    return -1;
+  }, 
+  updateConnectionCompleted:function(the_match_id, data){
+    const index = this.elements.findIndex((m) => m.match_id == the_match_id);
+    console.log(this.elements[index]);
+    if (index > -1) {
+      this.elements[index].connection_completed = data.connection_completed;
+      console.log(this.elements[index]);
+      return this.elements[index];
+    }
+    return -1;
+  }, 
+  deleteMatch: function (the_match_id) {
+    const index = this.elements.findIndex((m) =>  m.match_id == the_match_id);
+    if (index > -1) {
+      const the_match = this.elements[index];
+      this.elements.splice(index, 1);
+      return the_match;
+    }
+    return -1;
+  },
+  userAlreadyMatched: function(the_user_id){
     const index = this.elements.findIndex((m) => m.user1_id == the_user_id || m.user2_id == the_user_id);
     if (index > -1) {
       return true;
@@ -310,12 +367,6 @@ const Matches = {
     console.log(JSON.stringify(this));
   }
 };
-
-function conctantlyGenerateMatches() {
-  // while true()
-
-}
-conctantlyGenerateMatches();
 
 
 // Matches.generateMatches('Topic1');

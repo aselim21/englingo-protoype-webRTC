@@ -1,58 +1,44 @@
 
-const serverURL_rooms = 'http://localhost:3000'
+const serverURL_rooms = 'http://localhost:3000';
 window.addEventListener('DOMContentLoaded', (event) => {
     console.log('DOM fully loaded and parsed');
 });
 
-// let myVideoStream;
-// const myVideo = document.createElement("video");
-// myVideo.muted = true;
-// navigator.mediaDevices.getUserMedia({
-//     audio: true,
-//     video: true,
-// })
-// .then((stream) => {
-//     myVideoStream = stream;
-//     addVideoStream(myVideo, stream);
-// });
-const room1 = document.getElementById("room1");
-room1.addEventListener("click", async (e) => {
+const topic1_btn = document.getElementById('js-topic1-button');
+topic1_btn.addEventListener("click", async (e) => {
     const the_userId = window.localStorage.userId;
-    const the_offer = await createAnOffer();
     const data = {
         userId: the_userId,
         topic: e.srcElement.getAttribute('topic'),
-        offer: the_offer
     }
-    getYourMatch(data);
-    
-})
-
-function getYourMatch(data){
-    let answer;
-    setTimeout(async function () {
-        console.log('-----------no matches--------')
-        answer = await createRoom(data);
-        console.log(answer)
-        if(answer == 'no matches'){
-            getYourMatch(data);
-        }else{
-            connect(answer);
-        }
-}, 3000);
-}
-
-function connect(){
-    const peerConnection = new RTCPeerConnection(configuration);
-    peerConnection.addEventListener('datachannel', event => {
-    const dataChannel = event.channel;
+    getYourMatchID(data);
 });
 
+async function getYourMatchID(data) {
+    let match_id;
+    match_id = await createMatch_request(data);
+    if (match_id == 'no match') {
+        console.log('Match ID: ' + match_id)
+        setTimeout(async function () {
+            await getYourMatchID(data);
+        }, 5000)
+    } else {
+        window.location.replace(`/room/${match_id}`);
+    }
 }
-async function createRoom(data) {
-    console.log("----------Creating a room-----------------");
 
-    const response = await fetch(`${serverURL_rooms}/room`, {
+
+function connect() {
+    const peerConnection = new RTCPeerConnection(configuration);
+    peerConnection.addEventListener('datachannel', event => {
+        const dataChannel = event.channel;
+    });
+
+}
+async function createMatch_request(data) {
+    // console.log("----------Creating a room-----------------");
+
+    const response = await fetch(`${serverURL_rooms}/match`, {
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         //mode: 'cors', // no-cors, *cors, same-origin
         //cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
@@ -93,7 +79,7 @@ async function keepAskingForMatch(data) {
 async function createAnOffer() {
     // const peerConnection = new RTCPeerConnection(configuration);
     // const dataChannel = peerConnection.createDataChannel();
-    
+
     const peerConn = new RTCPeerConnection();
     const dataChann = peerConn.createDataChannel();
     dataChann.onmessage = e => console.log("Got a Message: " + e.data);
@@ -127,15 +113,3 @@ function renderTemplate(the_url, the_template, the_target) {
         });
     }
 }
-
-// const socket = io('http://localhost:3000');
-// socket.on('message', text => {
-//     console.log(text);
-// })
-// const addVideoStream = (video, stream) => {
-//     video.srcObject = stream;
-//     video.addEventListener("loadedmetadata", () => {
-//        video.play();
-//        videoGrid.append(video);
-//     });
-// };

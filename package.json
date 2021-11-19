@@ -6,6 +6,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "firebase": "^9.1.3",
+    "kafkajs": "^1.15.0",
     "mongoose": "^6.0.12",
     "uuid": "^8.3.2"
   },
@@ -13,7 +14,7 @@
     "nodemon": "^2.0.13"
   },
   "scripts": {
-    "devStart": "nodemon server/server.js", 
+    "devStart": "nodemon server/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

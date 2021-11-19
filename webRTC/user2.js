@@ -20,6 +20,7 @@ peerConnection.createAnswer().then(a => peerConnection.setRemoteDescription(a)).
 const configuration = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] }
 const peerConnection = new RTCPeerConnection(configuration);
 let dataChannel;
+
 peerConnection.addEventListener('datachannel', event => {
     dataChannel = event.channel;
     dataChannel.onopen = e => console.log('Connection opened');
