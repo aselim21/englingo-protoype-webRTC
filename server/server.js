@@ -17,7 +17,8 @@ const server = require('http').Server(app); //for socket IO
 
 app.use((req, res, next) => {
   const corsWhitelist = [
-    'https://webrtc-englingo.herokuapp.com'
+    'https://webrtc-englingo.herokuapp.com',
+    'http://127.0.0.1:3000'
   ];
   if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
       res.header('Access-Control-Allow-Origin', req.headers.origin);
