@@ -53,6 +53,7 @@ async function startMediaSharing() {
 
     
     peerConnection.ontrack = function({ streams: [stream] }) {
+        console.log('remote tracks received!')
     if (remoteVideo) {
       remoteVideo.srcObject = stream;
     }
