@@ -9,9 +9,12 @@ headers.append('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS,
 // const serverURL_rooms = 'http://localhost:3000';
 const the_match_id = window.location.pathname.slice(6);
 const the_userId = window.localStorage.userId;
-const configuration = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] , offerToReceiveAudio: true,
-offerToReceiveVideo: true }
-const peerConnection = new RTCPeerConnection(configuration);
+//const iceServers = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }]}
+var configuration = {
+    offerToReceiveAudio: true,
+    offerToReceiveVideo: true
+}
+const peerConnection = new RTCPeerConnection({configuration: configuration, iceServers: [{ 'urls': 'stun:stun.l.google.com:19302' }]});
 peerConnection.onconnectionstatechange = function(event) {
     console.log('State changed ' + peerConnection.connectionState);
 }
@@ -45,11 +48,12 @@ async function startMediaSharing() {
     //     offerToReceiveAudio: true,
     //     offerToReceiveVideo: true
     //     }
-    const constraints = { audio: true, video: true };
+    const constraints = { audio: false, video: true };
     //streams
     let localStream = await navigator.mediaDevices.getUserMedia(constraints);
     localVideo.srcObject = localStream;
     localStream.getTracks().forEach((track) => {
+        console.log("tracks sent");
         peerConnection.addTrack(track, localStream);
     });
 
