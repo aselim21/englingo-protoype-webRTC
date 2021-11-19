@@ -250,7 +250,7 @@ function constantlyGenerateMatches(the_topic) {
 //Start generation Matches for Topic 1
 constantlyGenerateMatches('Topic1');
 
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Express server listening on port ${PORT}`);
 });
 
