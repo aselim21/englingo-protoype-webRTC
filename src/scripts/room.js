@@ -17,12 +17,19 @@ peerConnection.onconnectionstatechange = function(event) {
 let dataChannel;
 let im_user_1 = false;
 let im_user_2 = false;
-
+const localVideo = document.getElementById('webcamVideo');
+const remoteVideo = document.getElementById('remoteVideo');
 
 window.addEventListener('DOMContentLoaded', (event) => {
     console.log('DOM fully loaded and parsed');
 });
-
+localVideo.addEventListener('loadedmetadata', function() {
+    console.log(`Local video videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
+  });
+  
+  remoteVideo.addEventListener('loadedmetadata', function() {
+    console.log(`Remote video videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
+  });
 
 
 
@@ -33,8 +40,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
 async function startMediaSharing() {
     console.log("startMediaSharing")
     //HTML elements
-    const localVideo = document.getElementById('webcamVideo');
-    const remoteVideo = document.getElementById('remoteVideo');
+   
     const constraints = { audio: false, video: true };
     //streams
     let localStream = await navigator.mediaDevices.getUserMedia(constraints);
