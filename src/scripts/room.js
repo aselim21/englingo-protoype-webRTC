@@ -49,7 +49,7 @@ async function startMediaSharing() {
     const mediaConstraints = { audio: false, video: true };
 
     // let localStream = await navigator.mediaDevices.getUserMedia(constraints);
-    // let remoteStream = new MediaStream();
+     let remoteStream = new MediaStream();
 
     // localStream.getTracks().forEach((track) => {
     //     console.log("tracks sent");
@@ -65,12 +65,12 @@ async function startMediaSharing() {
     .catch(handleGetUserMediaError);
     // let remoteStream = new MediaStream();
     peerConnection.ontrack = function (event) {
-        console.log('track received');
-        remoteVideo.srcObject = event.streams[0];
-        // event.streams[0].getTracks().forEach(track => {
-        //     remoteStream.addTrack(track);
-        //     remoteVideo.srcObject = remoteStream;
-        // })
+        // console.log('track received');
+        // remoteVideo.srcObject = event.streams[0];
+        event.streams[0].getTracks().forEach(track => {
+            remoteStream.addTrack(track);
+            remoteVideo.srcObject = remoteStream;
+        })
     }
     
 
@@ -163,7 +163,7 @@ async function createAnswerAndConnect_user2(offer, callback) {
     };
     const remoteDesc = new RTCSessionDescription(offer);
     await peerConnection.setRemoteDescription(remoteDesc);
-    const answer = await peerConnection.createAnswer(answerOptions);
+    const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
     return answer;
 }
