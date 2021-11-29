@@ -71,7 +71,7 @@ async function startMediaSharing() {
             remoteStream.addTrack(track);
         })
     }
-    remoteVideo.srcObject = null;
+    // remoteVideo.srcObject = null;
     remoteVideo.srcObject = remoteStream;
     
 
