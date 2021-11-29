@@ -12,7 +12,7 @@ var configuration = {
     offerToReceiveAudio: true,
     offerToReceiveVideo: true
 }
-const peerConnection = new RTCPeerConnection({ configuration: configuration, iceServers: [{ 'urls': 'stun:stun.l.google.com:19302' }] });
+let peerConnection = new RTCPeerConnection({ configuration: configuration, iceServers: [{ 'urls': 'stun:stun.l.google.com:19302' }] });
 peerConnection.onconnectionstatechange = function (event) {
     console.log('State changed ' + peerConnection.connectionState);
 }
@@ -68,7 +68,7 @@ async function startMediaSharing() {
     //     }
     // };
 }
-startMediaSharing();
+await startMediaSharing();
 
 
 //Main Function to connect the peers
@@ -81,6 +81,7 @@ async function connectThePeers() {
     let user2_answer = matchInfo.user2_answer;
     let connection_completed = matchInfo.connection_completed;
 
+    if(peerConnection == null) {return -1};
     if (im_user_1 == true && user1_offer == null && connection_completed == false) {
         //User 1 - creates an offer
         await createOffer_user1(updateMatchInfo);
@@ -195,7 +196,7 @@ async function deleteMatchInfo() {
 //     .catch(reportError);
 //   }
 
-//   peerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
+  peerConnection.onnegotiationneeded = await createOffer_user1(updateMatchInfo);
 
   function handleGetUserMediaError(e) {
     switch(e.name) {
