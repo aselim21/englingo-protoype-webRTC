@@ -26,6 +26,7 @@ setTimeout(() => {
     if (peerConnection.connectionState != 'connecting' || peerConnection.connectionState != 'connected') {
     alert("Your match left.");
         deleteMatchInfo();
+        closeVideoCall();
     }
     // 10 seconds
 }, 10000);
