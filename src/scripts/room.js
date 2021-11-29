@@ -44,14 +44,6 @@ remoteVideo.addEventListener('loadedmetadata', function () {
 
 //1. First start sharing media
 
-function gotRemoteStream(e) {
-    console.log('gotRemoteStream', e.track, e.streams[0]);
-  
-    // reset srcObject to work around minor bugs in Chrome and Edge.
-    remoteVideo.srcObject = null;
-    remoteVideo.srcObject = e.streams[0];
-  }
-
 async function startMediaSharing() {
 
     const mediaConstraints = { audio: false, video: true };
@@ -72,16 +64,15 @@ async function startMediaSharing() {
     })
     .catch(handleGetUserMediaError);
     // let remoteStream = new MediaStream();
-    peerConnection.ontrack = gotRemoteStream;
-    
-    // function (event) {
-    //     // console.log('track received');
-    //     // remoteVideo.srcObject = event.streams[0];
-    //     event.streams[0].getTracks().forEach(track => {
-    //         remoteStream.addTrack(track);
-    //         remoteVideo.srcObject = remoteStream;
-    //     })
-    // }
+    peerConnection.ontrack = function (event) {
+        console.log('track received');
+        // remoteVideo.srcObject = event.streams[0];
+        event.streams[0].getTracks().forEach(track => {
+            remoteStream.addTrack(track);
+        })
+    }
+    remoteVideo.srcObject = null;
+    remoteVideo.srcObject = remoteStream;
     
 
     // peerConnection.ontrack = function ({ streams: [stream] }) {
