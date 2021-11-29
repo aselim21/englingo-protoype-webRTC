@@ -23,7 +23,7 @@ peerConnection.onconnectionstatechange = function (event) {
 }
 
 setTimeout(() => {
-    if (peerConnection.connectionState != 'connecting' || peerConnection.connectionState != 'connected') {
+    if (peerConnection.connectionState != 'connected') {
     alert("Your match left.");
         deleteMatchInfo();
         closeVideoCall();
