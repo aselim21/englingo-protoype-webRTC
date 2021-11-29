@@ -1,3 +1,4 @@
+// const serverURL_rooms = 'http://localhost:3000';
 const serverURL_rooms = 'https://webrtc-englingo.herokuapp.com';
 const headers = new Headers();
 headers.append('Content-Type', 'application/json');
@@ -35,16 +36,23 @@ remoteVideo.addEventListener('loadedmetadata', function () {
 
 async function startMediaSharing() {
 
-    const constraints = { audio: false, video: true };
+    const mediaConstraints = { audio: false, video: true };
 
-    let localStream = await navigator.mediaDevices.getUserMedia(constraints);
+    // let localStream = await navigator.mediaDevices.getUserMedia(constraints);
     let remoteStream = new MediaStream();
 
-    localStream.getTracks().forEach((track) => {
-        console.log("tracks sent");
-        peerConnection.addTrack(track, localStream);
-    });
-    localVideo.srcObject = localStream;
+    // localStream.getTracks().forEach((track) => {
+    //     console.log("tracks sent");
+    //     peerConnection.addTrack(track, localStream);
+    // });
+    // localVideo.srcObject = localStream;
+
+    navigator.mediaDevices.getUserMedia(mediaConstraints)
+    .then(function(localStream) {
+        localVideo.srcObject = localStream;
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    })
+    .catch(handleGetUserMediaError);
 
     peerConnection.ontrack = function (event) {
         event.streams[0].getTracks().forEach(track => {
@@ -113,7 +121,7 @@ async function createOffer_user1(callback) {
         console.log("ICE candidate (peerConnection)", e);
         if (e.candidate == null) {
             console.log("ice candidate", peerConnection.localDescription);
-            callback({ user1_offer: peerConnection.localDescription });
+            callback({ user1_offer: {type : "video-offer", sdp: peerConnection.localDescription }});
         }
     };
     const offer = await peerConnection.createOffer();
@@ -170,3 +178,65 @@ async function deleteMatchInfo() {
     });
     return response.json();
 };
+
+//negotiation 
+// function handleNegotiationNeededEvent() {
+//     peerConnection.createOffer().then(function(offer) {
+//       return peerConnection.setLocalDescription(offer);
+//     })
+//     .then(function() {
+//       sendToServer({
+//         name: myUsername,
+//         target: targetUsername,
+//         type: "video-offer",
+//         sdp: peerConnection.localDescription
+//       });
+//     })
+//     .catch(reportError);
+//   }
+
+//   peerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
+
+  function handleGetUserMediaError(e) {
+    switch(e.name) {
+      case "NotFoundError":
+        alert("Unable to open your call because no camera and/or microphone" +
+              "were found.");
+        break;
+      case "SecurityError":
+      case "PermissionDeniedError":
+        // Do nothing; this is the same as the user canceling the call.
+        break;
+      default:
+        alert("Error opening your camera and/or microphone: " + e.message);
+        break;
+    }
+  
+    closeVideoCall();
+  }
+
+  function closeVideoCall() {
+      console.log('++++++video closed');
+  
+    if (peerConnection) {
+      peerConnection.ontrack = null;
+      peerConnection.onremovetrack = null;
+      peerConnection.onremovestream = null;
+      peerConnection.onicecandidate = null;
+      peerConnection.oniceconnectionstatechange = null;
+      peerConnection.onsignalingstatechange = null;
+      peerConnection.onicegatheringstatechange = null;
+      peerConnection.onnegotiationneeded = null;
+  
+      if (remoteVideo.srcObject) {
+        remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+      }
+  
+      if (localVideo.srcObject) {
+        localVideo.srcObject.getTracks().forEach(track => track.stop());
+      }
+  
+      peerConnection.close();
+      peerConnection = null;
+    }
+  }
