@@ -196,7 +196,7 @@ async function deleteMatchInfo() {
 //     .catch(reportError);
 //   }
 
-  peerConnection.onnegotiationneeded = await createOffer_user1(updateMatchInfo);
+//   peerConnection.onnegotiationneeded = await createOffer_user1(updateMatchInfo);
 
   function handleGetUserMediaError(e) {
     switch(e.name) {
