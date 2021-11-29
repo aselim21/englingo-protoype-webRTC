@@ -1,5 +1,5 @@
-// const serverURL_rooms = 'http://localhost:3000';
-const serverURL_rooms = 'https://webrtc-englingo.herokuapp.com';
+const serverURL_rooms = 'http://localhost:3000';
+// const serverURL_rooms = 'https://webrtc-englingo.herokuapp.com';
 const headers = new Headers();
 headers.append('Content-Type', 'application/json');
 headers.append('Accept', 'application/json');
@@ -12,6 +12,11 @@ var configuration = {
     offerToReceiveAudio: true,
     offerToReceiveVideo: true
 }
+const offerOptions = {
+    offerToReceiveAudio: 0,
+    offerToReceiveVideo: 1,
+    voiceActivityDetection: false
+  };
 let peerConnection = new RTCPeerConnection({ configuration: configuration, iceServers: [{ 'urls': 'stun:stun.l.google.com:19302' }] });
 peerConnection.onconnectionstatechange = function (event) {
     console.log('State changed ' + peerConnection.connectionState);
@@ -128,7 +133,7 @@ async function createOffer_user1(callback) {
             callback({ user1_offer: peerConnection.localDescription });
         }
     };
-    const offer = await peerConnection.createOffer();
+    const offer = await peerConnection.createOffer(offerOptions);
     await peerConnection.setLocalDescription(offer);
     return offer;
 }
