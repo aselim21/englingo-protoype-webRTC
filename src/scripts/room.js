@@ -14,13 +14,11 @@ var configuration = {
 }
 const offerOptions = {
     offerToReceiveAudio: 0,
-    offerToReceiveVideo: 1,
-    voiceActivityDetection: false
+    offerToReceiveVideo: 1
   };
   const answerOptions = {
     offerToReceiveAudio: 0,
-    offerToReceiveVideo: 1,
-    voiceActivityDetection: false
+    offerToReceiveVideo: 1
   };
 let peerConnection = new RTCPeerConnection({ configuration: configuration, iceServers: [{ 'urls': 'stun:stun.l.google.com:19302' }] });
 peerConnection.onconnectionstatechange = function (event) {
@@ -59,6 +57,7 @@ async function startMediaSharing() {
 
     navigator.mediaDevices.getUserMedia(mediaConstraints)
     .then(function(localStream) {
+        console.log('tracks sent')
         localVideo.srcObject = localStream;
       localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
     })
