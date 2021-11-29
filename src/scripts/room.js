@@ -121,7 +121,7 @@ async function createOffer_user1(callback) {
         console.log("ICE candidate (peerConnection)", e);
         if (e.candidate == null) {
             console.log("ice candidate", peerConnection.localDescription);
-            callback({ user1_offer: {type : "video-offer", sdp: peerConnection.localDescription }});
+            callback({ user1_offer: peerConnection.localDescription });
         }
     };
     const offer = await peerConnection.createOffer();
