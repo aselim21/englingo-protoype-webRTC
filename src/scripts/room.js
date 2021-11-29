@@ -15,15 +15,25 @@ var configuration = {
 const offerOptions = {
     offerToReceiveAudio: 0,
     offerToReceiveVideo: 1
-  };
-  const answerOptions = {
-    offerToReceiveAudio: 0,
-    offerToReceiveVideo: 1
-  };
+};
+
 let peerConnection = new RTCPeerConnection({ configuration: configuration, iceServers: [{ 'urls': 'stun:stun.l.google.com:19302' }] });
 peerConnection.onconnectionstatechange = function (event) {
     console.log('State changed ' + peerConnection.connectionState);
 }
+
+setTimeout(() => {
+    if (peerConnection.connectionState != 'connecting' || peerConnection.connectionState != 'connected') {
+    alert("Your match left.");
+        deleteMatchInfo();
+    }
+    // 5 seconds
+}, 5000);
+
+setTimeout(() => {
+    closeVideoCall();
+    //1minute
+}, 36000);
 let dataChannel;
 let im_user_1 = false;
 let im_user_2 = false;
@@ -47,7 +57,7 @@ async function startMediaSharing() {
     const mediaConstraints = { audio: false, video: true };
 
     let localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-     let remoteStream = new MediaStream();
+    let remoteStream = new MediaStream();
 
     localStream.getTracks().forEach((track) => {
         console.log("tracks sent");
@@ -55,19 +65,10 @@ async function startMediaSharing() {
     });
     localVideo.srcObject = localStream;
 
-    // navigator.mediaDevices.getUserMedia(mediaConstraints)
-    // .then(function(localStream) {
-    //     console.log('tracks sent')
-    //   localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-    // })
-    // .catch(handleGetUserMediaError);
-    // let remoteStream = new MediaStream();
     peerConnection.ontrack = function (event) {
         console.log('track received');
-        // remoteVideo.srcObject = event.streams[0];
         event.streams[0].getTracks().forEach(track => {
             remoteStream.addTrack(track);
-            
         })
         remoteVideo.srcObject = remoteStream;
     }
@@ -85,7 +86,7 @@ async function connectThePeers() {
     let user2_answer = matchInfo.user2_answer;
     let connection_completed = matchInfo.connection_completed;
 
-    if(peerConnection == null) {return -1};
+    if (peerConnection == null) { return -1 };
     if (im_user_1 == true && user1_offer == null && connection_completed == false) {
         //User 1 - creates an offer
         await createOffer_user1(updateMatchInfo);
@@ -202,46 +203,47 @@ async function deleteMatchInfo() {
 
 //   peerConnection.onnegotiationneeded = await createOffer_user1(updateMatchInfo);
 
-  function handleGetUserMediaError(e) {
-    switch(e.name) {
-      case "NotFoundError":
-        alert("Unable to open your call because no camera and/or microphone" +
-              "were found.");
-        break;
-      case "SecurityError":
-      case "PermissionDeniedError":
-        // Do nothing; this is the same as the user canceling the call.
-        break;
-      default:
-        alert("Error opening your camera and/or microphone: " + e.message);
-        break;
+function handleGetUserMediaError(e) {
+    switch (e.name) {
+        case "NotFoundError":
+            alert("Unable to open your call because no camera and/or microphone" +
+                "were found.");
+            break;
+        case "SecurityError":
+        case "PermissionDeniedError":
+            // Do nothing; this is the same as the user canceling the call.
+            break;
+        default:
+            alert("Error opening your camera and/or microphone: " + e.message);
+            break;
     }
-  
-    closeVideoCall();
-  }
 
-  function closeVideoCall() {
-      console.log('++++++video closed');
-  
+    closeVideoCall();
+}
+
+function closeVideoCall() {
+    console.log('++++++video closed');
+
     if (peerConnection) {
-      peerConnection.ontrack = null;
-      peerConnection.onremovetrack = null;
-      peerConnection.onremovestream = null;
-      peerConnection.onicecandidate = null;
-      peerConnection.oniceconnectionstatechange = null;
-      peerConnection.onsignalingstatechange = null;
-      peerConnection.onicegatheringstatechange = null;
-      peerConnection.onnegotiationneeded = null;
-  
-      if (remoteVideo.srcObject) {
-        remoteVideo.srcObject.getTracks().forEach(track => track.stop());
-      }
-  
-      if (localVideo.srcObject) {
-        localVideo.srcObject.getTracks().forEach(track => track.stop());
-      }
-  
-      peerConnection.close();
-      peerConnection = null;
+        peerConnection.ontrack = null;
+        peerConnection.onremovetrack = null;
+        peerConnection.onremovestream = null;
+        peerConnection.onicecandidate = null;
+        peerConnection.oniceconnectionstatechange = null;
+        peerConnection.onsignalingstatechange = null;
+        peerConnection.onicegatheringstatechange = null;
+        peerConnection.onnegotiationneeded = null;
+
+        if (remoteVideo.srcObject) {
+            remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+        }
+
+        if (localVideo.srcObject) {
+            localVideo.srcObject.getTracks().forEach(track => track.stop());
+        }
+
+        alert('Call ended.');
+        peerConnection.close();
+        peerConnection = null;
     }
-  }
+}
