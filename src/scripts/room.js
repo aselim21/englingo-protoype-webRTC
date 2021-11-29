@@ -1,5 +1,5 @@
-const serverURL_rooms = 'http://localhost:3000';
-// const serverURL_rooms = 'https://webrtc-englingo.herokuapp.com';
+// const serverURL_rooms = 'http://localhost:3000';
+const serverURL_rooms = 'https://webrtc-englingo.herokuapp.com';
 const headers = new Headers();
 headers.append('Content-Type', 'application/json');
 headers.append('Accept', 'application/json');
