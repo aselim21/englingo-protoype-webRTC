@@ -69,10 +69,11 @@ async function startMediaSharing() {
         // remoteVideo.srcObject = event.streams[0];
         event.streams[0].getTracks().forEach(track => {
             remoteStream.addTrack(track);
+            remoteVideo.srcObject = remoteStream;
         })
     }
     // remoteVideo.srcObject = null;
-    remoteVideo.srcObject = remoteStream;
+    
     
 
     // peerConnection.ontrack = function ({ streams: [stream] }) {
