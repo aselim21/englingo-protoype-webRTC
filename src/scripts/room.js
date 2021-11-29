@@ -27,8 +27,8 @@ setTimeout(() => {
     alert("Your match left.");
         deleteMatchInfo();
     }
-    // 5 seconds
-}, 5000);
+    // 10 seconds
+}, 10000);
 
 setTimeout(() => {
     closeVideoCall();
