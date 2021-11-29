@@ -17,6 +17,11 @@ const offerOptions = {
     offerToReceiveVideo: 1,
     voiceActivityDetection: false
   };
+  const answerOptions = {
+    offerToReceiveAudio: 0,
+    offerToReceiveVideo: 1,
+    voiceActivityDetection: false
+  };
 let peerConnection = new RTCPeerConnection({ configuration: configuration, iceServers: [{ 'urls': 'stun:stun.l.google.com:19302' }] });
 peerConnection.onconnectionstatechange = function (event) {
     console.log('State changed ' + peerConnection.connectionState);
@@ -158,7 +163,7 @@ async function createAnswerAndConnect_user2(offer, callback) {
     };
     const remoteDesc = new RTCSessionDescription(offer);
     await peerConnection.setRemoteDescription(remoteDesc);
-    const answer = await peerConnection.createAnswer();
+    const answer = await peerConnection.createAnswer(answerOptions);
     await peerConnection.setLocalDescription(answer);
     return answer;
 }
