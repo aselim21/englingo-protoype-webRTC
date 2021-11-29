@@ -46,22 +46,21 @@ async function startMediaSharing() {
 
     const mediaConstraints = { audio: false, video: true };
 
-    // let localStream = await navigator.mediaDevices.getUserMedia(constraints);
+    let localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
      let remoteStream = new MediaStream();
 
-    // localStream.getTracks().forEach((track) => {
-    //     console.log("tracks sent");
-    //     peerConnection.addTrack(track, localStream);
-    // });
-    // localVideo.srcObject = localStream;
+    localStream.getTracks().forEach((track) => {
+        console.log("tracks sent");
+        peerConnection.addTrack(track, localStream);
+    });
+    localVideo.srcObject = localStream;
 
-    navigator.mediaDevices.getUserMedia(mediaConstraints)
-    .then(function(localStream) {
-        console.log('tracks sent')
-        localVideo.srcObject = localStream;
-      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-    })
-    .catch(handleGetUserMediaError);
+    // navigator.mediaDevices.getUserMedia(mediaConstraints)
+    // .then(function(localStream) {
+    //     console.log('tracks sent')
+    //   localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    // })
+    // .catch(handleGetUserMediaError);
     // let remoteStream = new MediaStream();
     peerConnection.ontrack = function (event) {
         console.log('track received');
@@ -72,16 +71,6 @@ async function startMediaSharing() {
         })
         remoteVideo.srcObject = remoteStream;
     }
-    // remoteVideo.srcObject = null;
-    
-    
-
-    // peerConnection.ontrack = function ({ streams: [stream] }) {
-    //     console.log('remote tracks received!')
-    //     if (remoteVideo) {
-    //         remoteVideo.srcObject = stream;
-    //     }
-    // };
 }
 await startMediaSharing();
 
