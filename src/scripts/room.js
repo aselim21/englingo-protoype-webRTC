@@ -15,6 +15,15 @@ var configuration = {
 let peerConnection = new RTCPeerConnection({ configuration: configuration, iceServers: [{ 'urls': 'stun:stun.l.google.com:19302' }] });
 peerConnection.onconnectionstatechange = function (event) {
     console.log('State changed ' + peerConnection.connectionState);
+    if (peerConnection.connectionState == 'connected'){
+        let remoteStream = new MediaStream();
+        peerConnection.ontrack = function (event) {
+            event.streams[0].getTracks().forEach(track => {
+                remoteStream.addTrack(track);
+                remoteVideo.srcObject = remoteStream;
+            })
+        }
+    }
 }
 let dataChannel;
 let im_user_1 = false;
@@ -53,13 +62,14 @@ async function startMediaSharing() {
       localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
     })
     .catch(handleGetUserMediaError);
-
-    peerConnection.ontrack = function (event) {
-        event.streams[0].getTracks().forEach(track => {
-            remoteStream.addTrack(track);
-        })
-    }
-    remoteVideo.srcObject = remoteStream;
+    // let remoteStream = new MediaStream();
+    // peerConnection.ontrack = function (event) {
+    //     event.streams[0].getTracks().forEach(track => {
+    //         remoteStream.addTrack(track);
+    //         remoteVideo.srcObject = remoteStream;
+    //     })
+    // }
+    
 
     // peerConnection.ontrack = function ({ streams: [stream] }) {
     //     console.log('remote tracks received!')
