@@ -8,12 +8,12 @@ headers.append("Access-Control-Allow-Headers", 'Origin, X-Requested-With, Conten
 headers.append('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS, HEAD');
 const the_match_id = window.location.pathname.slice(6);
 const the_userId = window.localStorage.userId;
-var configuration = {
+const configuration = {
     offerToReceiveAudio: true,
     offerToReceiveVideo: true
 }
 const offerOptions = {
-    offerToReceiveAudio: 0,
+    offerToReceiveAudio: 1,
     offerToReceiveVideo: 1
 };
 
@@ -55,7 +55,7 @@ remoteVideo.addEventListener('loadedmetadata', function () {
 
 async function startMediaSharing() {
 
-    const mediaConstraints = { audio: false, video: true };
+    const mediaConstraints = { audio: true, video: true };
 
     let localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     let remoteStream = new MediaStream();
@@ -186,41 +186,6 @@ async function deleteMatchInfo() {
     return response.json();
 };
 
-//negotiation 
-// function handleNegotiationNeededEvent() {
-//     peerConnection.createOffer().then(function(offer) {
-//       return peerConnection.setLocalDescription(offer);
-//     })
-//     .then(function() {
-//       sendToServer({
-//         name: myUsername,
-//         target: targetUsername,
-//         type: "video-offer",
-//         sdp: peerConnection.localDescription
-//       });
-//     })
-//     .catch(reportError);
-//   }
-
-//   peerConnection.onnegotiationneeded = await createOffer_user1(updateMatchInfo);
-
-function handleGetUserMediaError(e) {
-    switch (e.name) {
-        case "NotFoundError":
-            alert("Unable to open your call because no camera and/or microphone" +
-                "were found.");
-            break;
-        case "SecurityError":
-        case "PermissionDeniedError":
-            // Do nothing; this is the same as the user canceling the call.
-            break;
-        default:
-            alert("Error opening your camera and/or microphone: " + e.message);
-            break;
-    }
-
-    closeVideoCall();
-}
 
 function closeVideoCall() {
     console.log('++++++video closed');
