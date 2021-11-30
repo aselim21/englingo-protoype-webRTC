@@ -32,7 +32,7 @@ async function startMediaSharing() {
         remoteVideo.srcObject = remoteStream;
     }
 }
-//await startMediaSharing();
+await startMediaSharing();
 
 async function createOffer_user1() {
     dataChannel = peerConnection.createDataChannel('channel1');

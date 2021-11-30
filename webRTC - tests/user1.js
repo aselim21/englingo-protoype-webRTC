@@ -107,6 +107,30 @@ async function createAnswerAndConnect_user2(offer) {
     return answer;
 }
 async function startMediaSharing() {
+
+  const mediaConstraints = { audio: true, video: true };
+
+  let localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+  let remoteStream = new MediaStream();
+
+  localStream.getTracks().forEach((track) => {
+      console.log("tracks sent");
+      peerConnection.addTrack(track, localStream);
+  });
+  localVideo.srcObject = localStream;
+
+  peerConnection.ontrack = function (event) {
+      console.log('track received');
+      event.streams[0].getTracks().forEach(track => {
+          remoteStream.addTrack(track);
+      })
+      remoteVideo.srcObject = remoteStream;
+  }
+}
+await startMediaSharing();
+
+//-------dafeult
+async function startMediaSharing() {
   //HTML elements
   const localVideo = document.getElementById('webcamVideo');
   const remoteVideo = document.getElementById('remoteVideo');
