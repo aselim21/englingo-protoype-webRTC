@@ -55,16 +55,18 @@ remoteVideo.addEventListener('loadedmetadata', function () {
 
 async function startMediaSharing() {
 
-    const mediaConstraints = { audio: true, video: true };
+    const mediaConstraints_toSend = { audio: true, video: true };
+    const mediaConstraints_toDisplay = { audio: false, video: true };
 
-    let localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+    let localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints_toSend);
+    let localStream_toDisplay = await navigator.mediaDevices.getUserMedia(mediaConstraints_toDisplay);
     let remoteStream = new MediaStream();
 
     localStream.getTracks().forEach((track) => {
         console.log("tracks sent");
         peerConnection.addTrack(track, localStream);
     });
-    localVideo.srcObject = localStream;
+    localVideo.srcObject = localStream_toDisplay;
 
     peerConnection.ontrack = function (event) {
         console.log('track received');
