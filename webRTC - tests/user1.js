@@ -76,7 +76,13 @@ peerConnection.ontrack = ({track, streams}) => {
   const configuration = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] }
   const peerConnection = new RTCPeerConnection(configuration);
   let dataChannel;
-  
+  const offerOptions = {
+    offerToReceiveAudio: 1,
+    offerToReceiveVideo: 1
+};
+const localVideo = document.getElementById('webcamVideo');
+const remoteVideo = document.getElementById('remoteVideo');
+
   async function createOffer_user1() {
     console.log("creating an offer");
     dataChannel = peerConnection.createDataChannel('channel1');
@@ -84,7 +90,7 @@ peerConnection.ontrack = ({track, streams}) => {
     dataChannel.onmessage = e => console.log('Got a message: ' + e.data);
     dataChannel.onopen = e => console.log('Connection opened');
 
-    const offer = await peerConnection.createOffer();
+    const offer = await peerConnection.createOffer(offerOptions);
     await peerConnection.setLocalDescription(offer);
     return offer;
 }
