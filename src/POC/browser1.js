@@ -1,8 +1,5 @@
-const configuration = {
-    offerToReceiveAudio: true,
-    offerToReceiveVideo: true
-}
-let peerConnection = new RTCPeerConnection({ configuration: configuration, iceServers: [{ 'urls': 'stun:stun.l.google.com:19302' }] });
+const configuration = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] }
+const peerConnection = new RTCPeerConnection(configuration);
 let dataChannel;
 const offerOptions = {
     offerToReceiveAudio: 1,
@@ -10,6 +7,23 @@ const offerOptions = {
 };
 const localVideo = document.getElementById('webcamVideo');
 const remoteVideo = document.getElementById('remoteVideo');
+
+async function createOffer_user1() {
+    console.log("creating an offer");
+    dataChannel = peerConnection.createDataChannel('channel1');
+    peerConnection.onicecandidate = e => console.log('New ICE candidate! reprinting SDP' + JSON.stringify(peerConnection.localDescription))
+    dataChannel.onmessage = e => console.log('Got a message: ' + e.data);
+    dataChannel.onopen = e => console.log('Connection opened');
+
+    const offer = await peerConnection.createOffer(offerOptions);
+    await peerConnection.setLocalDescription(offer);
+    return offer;
+}
+async function connectToPeer_user1(answer) {
+    console.log("connceting to answer");
+    const remoteDesc = new RTCSessionDescription(answer);
+    await peerConnection.setRemoteDescription(remoteDesc);
+}
 
 async function startMediaSharing() {
 
@@ -33,24 +47,3 @@ async function startMediaSharing() {
     }
 }
 await startMediaSharing();
-
-async function createOffer_user1() {
-    dataChannel = peerConnection.createDataChannel('channel1');
-    dataChannel.onmessage = e => console.log('Got a message: ' + e.data);
-    dataChannel.onopen = e => console.log('Connection opened');
-    peerConnection.onicecandidate = function (e) {
-        console.log("ICE candidate (peerConnection)", e);
-        if (e.candidate == null) {
-            console.log("ice candidate", peerConnection.localDescription);
-        }
-    };
-    const offer = await peerConnection.createOffer(offerOptions);
-    await peerConnection.setLocalDescription(offer);
-    console.log(JSON.stringify(offer));
-    return offer;
-}
-
-async function connectToPeer_user1(answer) {
-    const remoteDesc = new RTCSessionDescription(answer);
-    await peerConnection.setRemoteDescription(remoteDesc);
-}
