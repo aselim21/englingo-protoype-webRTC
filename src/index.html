@@ -6,81 +6,28 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room</title>
-
-    <!--Important-->
-    <!--We cannot use new Websocket(), we have to use socket.io client-->
-    <!-- <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script> -->
-    <!--this should be after: defer!-->
-    <!-- <script defer src="/scripts/index.js"></script> -->
-   <!--You need type = module, else SyntaxError: Cannot use import statement outside a module for npm package in frontend-->
-   <!-- <script src="/firebase/firebase-app.js"></script>
-   <script src="/firebase/firebase-auth.js"></script>
-   <script src="/firebase/firebase-firestore.js"></script> -->
-   <!-- <script defer type="module" src="/scripts/webrtc-test.js"></script> -->
    <script defer type="module" src="/scripts/index.js"></script>
-    <!-- <script defer type="module" src="/firebase.js"></script> -->
     <link rel="stylesheet" type="text/css" href="/styles/video.css" />
     
 </head>
 
 <body>
 
-    <h1>Welcome to Speak Fellow</h1>
-    <!--Autoplay, else if will freeze in the first frame-->
-
+    <h1>Welcome to Englingo</h1>
+    
+    <h2>What you need to do to test this?</h2>
+    <ol>
+        <li>Get 2 devices and open this website on them. (2 Browsers on the same device will throw an error.)</li>
+        <li>Click on 'Join the room' from the one device.</li>
+        <li>Click on 'Join the room' from the other device.</li>
+        <li>Wait some seconds until they connect successfully.</li>
+        <p>Note that the call will finish after 1 minute. Enjoy!</p>
+      </ol>  
     <div>
         <button id="js-topic1-button" topic="Topic1">Join the room</button>
     </div>
-    <div class="videos" >
-        <span>
-            <h3>Local camera</h3>
-            <video id="webcamVideo" autoplay></video>
-        </span>
-        <span>
-            <h3>Remote camera</h3>
-            <video id="remoteVideo" autoplay></video>
-        </span>
-    </div>
+    <h2></h2>
 
-
-    <!-- <div class="videos" >
-        <span>
-            <h3>Local camera</h3>
-            <video id="webcamVideo" autoplay ></video>
-        </span>
-        <span>
-            <h3>Remote camera</h3>
-            <video id="remoteVideo" autoplay ></video>
-        </span>
-    </div> -->
-    
-
-    <!--It is not working in Js file-->
-    <!-- <script>
-        //Show the result of the media
-        const constraints = {
-            video: true, audio: true
-        };
-        const video = document.querySelector("video");
-
-        navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-            video.srcObject = stream;
-        });
-    </script> -->
-
-    <!-- <script>
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-
-const context = new AudioContext();
-
-navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-  const microphone = context.createMediaStreamSource(stream);
-  const filter = context.createBiquadFilter();
-  // microphone -> filter -> destination
-  microphone.connect(filter);
-  filter.connect(context.destination);
-});
-    </script> -->
 
 </body>
 
