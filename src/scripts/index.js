@@ -6,7 +6,7 @@ headers.append('Accept', 'application/json');
 headers.append("Access-Control-Allow-Credentials", "true");
 headers.append("Access-Control-Allow-Headers", 'Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Credentials, Access-Control-Allow-Methods, Cookie, Set-Cookie, Authorization');
 headers.append('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS, HEAD');
-
+window.localStorage.setItem('userId', `englingo_user${Math.floor(Math.random() * 100)}`);
 //Listen to the Button for Topic 1
 const topic1_btn = document.getElementById('js-topic1-button');
 topic1_btn.addEventListener("click", async (e) => {
