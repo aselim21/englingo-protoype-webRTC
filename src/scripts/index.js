@@ -28,7 +28,8 @@ async function getYourMatchID(data) {
             await getYourMatchID(data);
         }, 5000)
     } else {
-        window.location.replace(`/room/${match_id}`);
+        window.location.assign(`/room/${match_id}`);
+        // window.location.replace(`/room/${match_id}`);
     }
 }
 
