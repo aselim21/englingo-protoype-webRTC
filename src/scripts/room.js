@@ -31,10 +31,13 @@ setTimeout(() => {
     // 10 seconds
 }, 10000);
 
-setTimeout(() => {
-    closeVideoCall();
-    //1minute
-}, 36000);
+// setTimeout(() => {
+//     closeVideoCall();
+//     //1minute
+// }, 36000);
+
+
+
 let dataChannel;
 let im_user_1 = false;
 let im_user_2 = false;
