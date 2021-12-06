@@ -31,10 +31,10 @@ setTimeout(() => {
     // 10 seconds
 }, 10000);
 
-// setTimeout(() => {
-//     closeVideoCall();
-//     //1minute
-// }, 36000);
+setTimeout(() => {
+    closeVideoCall();
+    //1minute
+}, 108000);
 
 
 
