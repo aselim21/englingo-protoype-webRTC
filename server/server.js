@@ -255,9 +255,10 @@ constantlyGenerateMatches('Topic1');
 
 const zmq = require("zeromq");
 // const pullSock = zmq.socket('pull');
+//'tcp://'+process.argv[3]+':3000'
 const pushSock = zmq.socket('push');
-
-pushSock.bindSync("tcp://*:"+PORT);
+const zmqAddress = 'tcp://'+process.argv[3]+':'+PORT;
+pushSock.bindSync(zmqAddress);
 
 //console.log("Producer bound to port ");
 
