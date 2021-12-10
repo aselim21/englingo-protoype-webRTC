@@ -25,9 +25,8 @@ app.use((req, res, next) => {
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~RESTful Service - Methods~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-app.get('/', (req, res) => {
+app.get('/myIP', (req, res) => {
     res.send(req.heroku.ip);
-
 });
 
 app.get('/home', (req, res) => {
