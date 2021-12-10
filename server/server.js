@@ -259,7 +259,8 @@ const zmq = require("zeromq");
 const pushSock = zmq.socket('push');
 const zmqAddress = 'tcp://'+process.argv[0]+':'+PORT;
 const zmqAddress_local = 'tcp://*:'+PORT;
-pushSock.bindSync(zmqAddress_local);
+const zqmAddress_heroku = 'tcp://webrtc-englingo.herokuapp.com:'+PORT;
+pushSock.bindSync(zqmAddress_heroku);
 
 //console.log("Producer bound to port ");
 
