@@ -258,7 +258,7 @@ myIP = require('my-ip');
 // const pullSock = zmq.socket('pull');
 //'tcp://'+process.argv[3]+':3000'
 const pushSock = zmq.socket('push');
-const zmqAddress = 'tcp://'+process.env.CLOUDAMQP_URL+':'+PORT;
+const zmqAddress = process.env.CLOUDTCP_URL+':'+PORT;
 const zmqAddress_local = 'tcp://127.0.0.1:'+PORT;
 const zqmAddress_heroku = 'tcp://webrtc-englingo.herokuapp.com:'+PORT;
 
