@@ -257,7 +257,8 @@ const zmq = require("zeromq");
 // const pullSock = zmq.socket('pull');
 //'tcp://'+process.argv[3]+':3000'
 const pushSock = zmq.socket('push');
-const zmqAddress = 'tcp://'+process.argv[3]+':'+PORT;
+const zmqAddress = 'tcp://'+process.argv[0]+':'+PORT;
+const zmqAddress_local = 'tcp://*:'+PORT;
 pushSock.bindSync(zmqAddress);
 
 //console.log("Producer bound to port ");
@@ -269,7 +270,7 @@ setInterval(function() {
  
 }, 6000);
 
-
+console.log(process.argv[0])
 
 
 
