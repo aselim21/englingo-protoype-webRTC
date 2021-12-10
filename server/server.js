@@ -259,19 +259,19 @@ myIP = require('my-ip');
 //'tcp://'+process.argv[3]+':3000'
 const pushSock = zmq.socket('push');
 const zmqAddress = 'tcp://'+myIP(null,true)+':'+PORT;
-const zmqAddress_local = 'tcp://*:'+PORT;
+const zmqAddress_local = 'tcp://127.0.0.1:'+PORT;
 const zqmAddress_heroku = 'tcp://webrtc-englingo.herokuapp.com:'+PORT;
 
-//pushSock.bindSync(zmqAddress);
+pushSock.bindSync(zmqAddress_local);
 
 //console.log("Producer bound to port ");
 
 
-// setInterval(function() {
-//   console.log("~~Message Sent~~");
-//   pushSock.send('~~~~~Message from Zero~~~~');
+setInterval(function() {
+  console.log("~~Message Sent~~");
+  pushSock.send('~~~~~Message from Zero~~~~');
  
-// }, 6000);
+}, 6000);
 
 
 console.log(zmqAddress);// return internal IPv4
@@ -280,8 +280,7 @@ console.log(zmqAddress);// return internal IPv4
 
 
 //IP heroku
-var herokuIp = require('heroku-ip');
-app.use(herokuIp(['production']));
+
 
 
 app.listen(PORT, () => {
