@@ -254,13 +254,15 @@ constantlyGenerateMatches('Topic1');
 //zeroMQ
 
 const zmq = require("zeromq");
+myIP = require('my-ip');
 // const pullSock = zmq.socket('pull');
 //'tcp://'+process.argv[3]+':3000'
 const pushSock = zmq.socket('push');
-const zmqAddress = 'tcp://'+process.argv[0]+':'+PORT;
+const zmqAddress = 'tcp://'+myIP(null,true)+':'+PORT;
 const zmqAddress_local = 'tcp://*:'+PORT;
 const zqmAddress_heroku = 'tcp://webrtc-englingo.herokuapp.com:'+PORT;
-pushSock.bindSync(zqmAddress_heroku);
+
+pushSock.bindSync(zmqAddress);
 
 //console.log("Producer bound to port ");
 
@@ -271,7 +273,10 @@ setInterval(function() {
  
 }, 6000);
 
-console.log(process.argv[0])
+
+//console.log(myIP(null,true));// return internal IPv4
+
+// console.log(process.argv[0])
 
 
 
