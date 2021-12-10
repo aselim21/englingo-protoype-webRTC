@@ -250,6 +250,30 @@ function constantlyGenerateMatches(the_topic) {
 //Start generation Matches for Topic 1
 constantlyGenerateMatches('Topic1');
 
+
+//zeroMQ
+
+const zmq = require("zeromq");
+// const pullSock = zmq.socket('pull');
+const pushSock = zmq.socket('push');
+
+pushSock.bindSync("tcp://*:"+PORT);
+
+//console.log("Producer bound to port ");
+
+
+setInterval(function() {
+  console.log("~~Message Sent~~");
+  pushSock.send('~~~~~Message from Zero~~~~');
+ 
+}, 6000);
+
+
+
+
+
+
+
 app.listen(PORT, () => {
   console.log(`Express server listening on port ${PORT}`);
 });
