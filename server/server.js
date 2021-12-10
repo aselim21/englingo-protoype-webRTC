@@ -26,7 +26,8 @@ app.use((req, res, next) => {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~RESTful Service - Methods~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 app.get('/', (req, res) => {
-  res.send("Go to Home");
+    res.send(req.heroku.ip);
+
 });
 
 app.get('/home', (req, res) => {
@@ -262,24 +263,26 @@ const zmqAddress = 'tcp://'+myIP(null,true)+':'+PORT;
 const zmqAddress_local = 'tcp://*:'+PORT;
 const zqmAddress_heroku = 'tcp://webrtc-englingo.herokuapp.com:'+PORT;
 
-pushSock.bindSync(zmqAddress);
+//pushSock.bindSync(zmqAddress);
 
 //console.log("Producer bound to port ");
 
 
-setInterval(function() {
-  console.log("~~Message Sent~~");
-  pushSock.send('~~~~~Message from Zero~~~~');
+// setInterval(function() {
+//   console.log("~~Message Sent~~");
+//   pushSock.send('~~~~~Message from Zero~~~~');
  
-}, 6000);
+// }, 6000);
 
 
-//console.log(myIP(null,true));// return internal IPv4
+console.log(zmqAddress);// return internal IPv4
 
 // console.log(process.argv[0])
 
 
-
+//IP heroku
+var herokuIp = require('heroku-ip');
+app.use(herokuIp(['production']));
 
 
 app.listen(PORT, () => {
