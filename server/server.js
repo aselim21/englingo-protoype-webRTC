@@ -48,7 +48,6 @@ app.get('/matches/:matchId', (req, res) => {
 app.get('/matches/participants/:userId', (req,res)=>{
     const user_id = req.params.userId;
     const match_id = Matches.findMyMatchID(user_id);
-    logger.info(`GET-matches/participants/${user_id} => ${match_id}`);
     res.status(200).send(JSON.stringify(match_id));
 })
 
