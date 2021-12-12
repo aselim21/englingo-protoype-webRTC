@@ -22,7 +22,7 @@ function buildProdLogger() {
       )
     }),
     new transports.MongoDB({
-        db : 'mongodb+srv://enki-admin-cart:enki1234@cluster0.5xz0p.mongodb.net/enki-carts?retryWrites=true&w=majority',
+        db : 'mongodb+srv://englingo-admin:admin123@cluster0.enlfp.mongodb.net/englingo-matches?retryWrites=true&w=majority',
         useUnifiedTopology: true ,
         collection: 'logs'
     })

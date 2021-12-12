@@ -5,7 +5,7 @@ const path = require('path');
 const logger = require('./logger');
 app.use(express.json());
 app.use(express.static("src"));
-const MongodbURI = "mongodb+srv://enki-admin-cart:enki1234@cluster0.5xz0p.mongodb.net/enki-carts?retryWrites=true&w=majority";
+const MongodbURI = "mongodb+srv://englingo-admin:admin123@cluster0.enlfp.mongodb.net/englingo-matches?retryWrites=true&w=majority";
 const Log = require('./models/log_model.js');
 const { v4: uuidv4 } = require("uuid");
 const PORT = process.env.PORT || 3000;

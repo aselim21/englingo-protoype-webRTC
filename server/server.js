@@ -5,8 +5,8 @@ const path = require('path');
 const logger = require('./logger');
 app.use(express.json());
 app.use(express.static("src"));
-const MongodbURI = "mongodb+srv://enki-admin-cart:enki1234@cluster0.5xz0p.mongodb.net/enki-carts?retryWrites=true&w=majority";
-const Log = require('./models/log_model.js');
+const MongodbURI = "mongodb+srv://englingo-admin:admin123@cluster0.enlfp.mongodb.net/englingo-matches?retryWrites=true&w=majority";
+const Log = require('./models/log-model.js');
 const { v4: uuidv4 } = require("uuid");
 const PORT = process.env.PORT || 3000;
 
@@ -255,42 +255,6 @@ function constantlyGenerateMatches(the_topic) {
 //Start generation Matches for Topic 1
 constantlyGenerateMatches('Topic1');
 
-
-//zeroMQ
-
-const zmq = require("zeromq");
-myIP = require('my-ip');
-// const pullSock = zmq.socket('pull');
-//'tcp://'+process.argv[3]+':3000'
-const pushSock = zmq.socket('push');
-const zmqAddress = 'tcp://'+""+':'+PORT;
-const zmqAddress_local = 'tcp://127.0.0.1:'+PORT;
-const zqmAddress_heroku = 'tcp://webrtc-englingo.herokuapp.com:'+PORT;
-
-// pushSock.bindSync(zmqAddress_local);
-
-//console.log("Producer bound to port ");
-
-
-setInterval(function() {
-  console.log("~~Message Sent~~");
-  pushSock.send('~~~~~Message from Zero~~~~');
- 
-}, 6000);
-
-
-// console.log(zmqAddress);// return internal IPv4
-
-// console.log(process.argv[0])
-
-
-//IP heroku
-
-
-
-// app.listen(PORT, () => {
-//   console.log(`Express server listening on port ${PORT}`);
-// });
 
 //connect with DB and start the server
 mongoose.connect(MongodbURI, { useNewUrlParser: true, useUnifiedTopology: true })
