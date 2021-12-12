@@ -14,7 +14,8 @@ app.use((req, res, next) => {
   const corsWhitelist = [
     'https://webrtc-englingo.herokuapp.com',
     'http://127.0.0.1',
-    'http://localhost'
+    'http://localhost',
+    'https://englingo.herokuapp.com'
   ];
   if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
     res.header('Access-Control-Allow-Origin', req.headers.origin);
