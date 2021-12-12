@@ -27,14 +27,14 @@ app.use((req, res, next) => {
   next();
 });
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~Matches~~~~~~~~~~~~~~~~~~~~~~~~~~
 app.get('/', (req, res) => {
   res.send('Welcome to Englingo-Matches Service');
 });
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~Matches~~~~~~~~~~~~~~~~~~~~~~~~~~
 app.get('/matches', (req, res) => {
   const matches = {matches:Matches.elements}
-  res.status(200).send(JSON.stringify(matches));
+  res.status(200).send(matches);
 });
 
 // ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
@@ -189,12 +189,9 @@ const Matches = {
     return -1;
   },
   updateMatchOffer: function (the_match_id, data) {
-    logger.info (`updateMatchOffer : ${the_match_id}, ${JSON.stringify(data)}`);
     const index = this.elements.findIndex((m) => m.match_id == the_match_id);
-    logger.info(`updateMatchOffer : Index = ${this.elements[index]}`);
     if (index > -1) {
       this.elements[index].user1_offer = data.user1_offer;
-      logger.info(`updateMatchOffer : Updated = ${this.elements[index]}`);
       return this.elements[index];
     }
     return -1;
