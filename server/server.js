@@ -31,6 +31,64 @@ app.get('/', (req, res) => {
   res.send('Welcome to Englingo-Matches Service');
 });
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~Matches~~~~~~~~~~~~~~~~~~~~~~~~~~
+app.get('/matches', (req, res) => {
+  const matches = {matches:Matches.elements}
+  res.status(200).send(JSON.stringify(matches));
+});
+
+// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
+app.get('/matches/:matchId', (req, res) => {
+  const matchId = req.params.matchId;
+  const the_match = Matches.getMatchInfo(matchId);
+  res.status(200).send(JSON.stringify(the_match));
+});
+
+// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
+app.get('/matches/participants/:userId', (req,res)=>{
+    const user_id = req.params.userId;
+    const match_id = Matches.findMyMatchID(user_id);
+    logger.info(`GET-matches/participants/${user_id} => ${match_id}`);
+    res.status(200).send(JSON.stringify(match_id));
+})
+
+// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
+app.post('/participant', (req, res) => {
+  
+  const topic = req.body.topic;
+  const user_id = req.body.userId;
+  const result = Queues.getQueue(topic).addParticipant({
+    user_id: user_id
+  });
+  logger.info(`POST-participant => ${JSON.stringify(req.body)}`);
+  res.status(200).send();
+});
+
+app.put('/matches/:matchId', (req, res) => {
+  const matchId = req.params.matchId;
+  let result;
+
+  if (req.body.user1_offer) {
+    result = Matches.updateMatchOffer(matchId, req.body);
+    logger.info(`PUT-matches/${matchId}:OFFER => ${JSON.stringify(result)}`);
+  } else if (req.body.user2_answer) {
+    result = Matches.updateMatchAnswer(matchId, req.body);
+    logger.info(`PUT-matches/${matchId}:ANSWER => ${JSON.stringify(result)}`);
+  } else if (req.body.connection_completed) {
+    result = Matches.updateConnectionCompleted(matchId, req.body);
+    logger.info(`PUT-matches/${matchId}:COMPLETE => ${JSON.stringify(result)}`);
+  }
+
+  res.status(200).send(JSON.stringify(result));
+});
+
+app.delete('/matches/:matchId', (req, res) => {
+  const matchId = req.params.matchId;
+  Matches.deleteMatch(matchId);
+  logger.info(`DELETE-matches/${matchId}`);
+  res.status(200).send();
+});
+
 //----------------------LOGS-------------------
 //get all logs of the service
 app.get('/logs', (req, res) => {
@@ -42,75 +100,6 @@ app.get('/logs', (req, res) => {
           logger.error(err);
       })
 })
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~Matches~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-// app.get('/match', (req, res) => {
-//   const the_topic = req.body.topic;
-//   const the_user_id = req.body.userId;
-//   Queues.getQueue(the_topic).addParticipant({
-//     user_id: req.body.userId
-//   });
-//   const match_offer = Matches.getMyMatch(the_user_id);
-//   res.status(200).send(JSON.stringify(match_offer));
-// });
-
-// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
-app.get('/match/:matchId', (req, res) => {
-  const matchId = req.params.matchId;
-  const the_match = Matches.getMatchInfo(matchId);
-  logger.info(`GET-match/${matchId} => ${JSON.stringify(the_match)}`);
-  res.status(200).send(JSON.stringify(the_match));
-});
-
-// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
-app.get('/match/participant/:userId', (req,res)=>{
-    const user_id = req.params.userId;
-    const match_id = Matches.findMyMatchID(user_id);
-    logger.info(`GET-match/participant/${user_id} => ${match_id}`);
-    res.status(200).send(JSON.stringify(match_id));
-})
-
-// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
-app.post('/participant', (req, res) => {
-  // logger.info(`POST-participant/${user_id} => ${match_id}`);
-  logger.info(`POST-/participant ${JSON.stringify(req.body)}`);
-  const topic = req.body.topic;
-  const user_id = req.body.userId;
-  const result = Queues.getQueue(topic).addParticipant({
-    user_id: user_id
-  });
-  console.log('Result =' + result);
-  // logger.info(`POST-participant => ${req.body}`);
-  res.status(200).send();
-});
-
-app.put('/match/:matchId', (req, res) => {
-  const matchId = req.params.matchId;
-  let result;
-  if (req.body.user1_offer) {
-    console.log("Its offer");
-    result = Matches.updateMatchOffer(matchId, req.body);
-    logger.info(`PUT-match/${matchId}:OFFER => ${JSON.stringify(result)}`);
-  } else if (req.body.user2_answer) {
-    console.log("Its answer");
-    result = Matches.updateMatchAnswer(matchId, req.body);
-    logger.info(`PUT-match/${matchId}:ANSWER => ${JSON.stringify(result)}`);
-  } else if (req.body.connection_completed) {
-    console.log("Its completed");
-    result = Matches.updateConnectionCompleted(matchId, req.body);
-    logger.info(`PUT-match/${matchId}:COMPLETE => ${JSON.stringify(result)}`);
-  }
-  res.status(200).send(JSON.stringify(result));
-});
-
-app.delete('/match/:matchId', (req, res) => {
-  const matchId = req.params.matchId;
-  Matches.deleteMatch(matchId);
-  logger.info(`DELETE-match/${matchId}`);
-  res.status(200).send();
-});
-
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Queue for a topic~~~~~~~~~~~~~~~~~~~~~~~~~~
 const Queue = {
@@ -137,6 +126,7 @@ const Queue = {
   print: function () {
     console.log("-------------------QUEUE-------------------")
     console.log(JSON.stringify(this));
+    return this;
   }
 };
 
@@ -153,15 +143,9 @@ const Queues = {
   print: function () {
     console.log("-------------------QUEUES-------------------")
     console.log(JSON.stringify(this));
+    return this;
   }
 }
-
-//Define only 1 Topic
-const topic1Queue = Object.create(Queue);
-topic1Queue.topic = "Topic1";
-topic1Queue.participants = [];
-Queues.addQueue(topic1Queue);
-
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Matches~~~~~~~~~~~~~~~~~~~~~~~~~~
 const Matches = {
@@ -254,8 +238,15 @@ const Matches = {
   print: function () {
     console.log("-------------------MATCHES-------------------");
     console.log(JSON.stringify(this));
+    return this;
   }
 };
+
+//Define 1 Topic
+const topic1Queue = Object.create(Queue);
+topic1Queue.topic = "Topic1";
+topic1Queue.participants = [];
+Queues.addQueue(topic1Queue);
 
 //Constantly generate Matches for a topic
 function constantlyGenerateMatches(the_topic) {
@@ -266,6 +257,7 @@ function constantlyGenerateMatches(the_topic) {
 }
 //Start generation Matches for Topic 1
 constantlyGenerateMatches('Topic1');
+
 
 
 //connect with DB and start the server
