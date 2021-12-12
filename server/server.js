@@ -13,8 +13,8 @@ const PORT = process.env.PORT || 3000;
 app.use((req, res, next) => {
   const corsWhitelist = [
     'https://webrtc-englingo.herokuapp.com',
-    'http://127.0.0.1',
-    'http://localhost',
+    'http://127.0.0.1:3000',
+    'http://localhost:3000',
     'https://englingo.herokuapp.com'
   ];
   if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
@@ -62,7 +62,7 @@ app.get('/match/:matchId', (req, res) => {
 });
 
 // ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
-app.get('/match/participand/:userId', (req,res)=>{
+app.get('/match/participant/:userId', (req,res)=>{
     const user_id = req.params.userId;
     const match_id = Matches.findMyMatchID(user_id);
     res.status(200).send(JSON.stringify(match_id));
