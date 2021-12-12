@@ -27,6 +27,24 @@ app.use((req, res, next) => {
 });
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~RESTful Service - Methods~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+app.get('/myIP', (req, res) => {
+    res.send(process.env);
+});
+
+app.get('/home', (req, res) => {
+  res.sendFile(path.join(__dirname, '../src', 'index.html'));
+
+});
+app.get('/room', (req, res) => {
+  res.sendFile(path.join(__dirname, '../src', 'room.html'));
+});
+
+app.get('/room/:roomId', (req, res) => {
+  res.sendFile(path.join(__dirname, '../src', 'room.html'));
+});
+
 //----------------------LOGS-------------------
 //get all logs of the service
 app.get('/logs', (req, res) => {
@@ -41,17 +59,16 @@ app.get('/logs', (req, res) => {
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Matches~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// app.get('/match', (req, res) => {
-//   const the_topic = req.body.topic;
-//   const the_user_id = req.body.userId;
-//   Queues.getQueue(the_topic).addParticipant({
-//     user_id: req.body.userId
-//   });
-//   const match_offer = Matches.getMyMatch(the_user_id);
-//   res.status(200).send(JSON.stringify(match_offer));
-// });
+app.get('/match', (req, res) => {
+  const the_topic = req.body.topic;
+  const the_user_id = req.body.userId;
+  Queues.getQueue(the_topic).addParticipant({
+    user_id: req.body.userId
+  });
+  const match_offer = Matches.getMyMatch(the_user_id);
+  res.status(200).send(JSON.stringify(match_offer));
+});
 
-// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
 app.get('/match/:matchId', (req, res) => {
   console.log('reading match info')
   const matchId = req.params.matchId;
@@ -60,21 +77,15 @@ app.get('/match/:matchId', (req, res) => {
   res.status(200).send(JSON.stringify(the_match));
 });
 
-// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
-app.get('/match/participand/:userId', (req,res)=>{
-    const user_id = req.params.userId;
-    const match_id = Matches.findMyMatchID(user_id);
-    res.status(200).send(JSON.stringify(match_id));
-})
+app.post('/match', (req, res) => {
 
-// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
-app.post('/participant', (req, res) => {
-  const topic = req.body.topic;
-  const user_id = req.body.userId;
-  Queues.getQueue(topic).addParticipant({
-    user_id: user_id
+  const the_topic = req.body.topic;
+  const the_user_id = req.body.userId;
+  Queues.getQueue(the_topic).addParticipant({
+    user_id: req.body.userId
   });
-  res.status(200).send();
+  const the_match_id = Matches.findMyMatchID(the_user_id);
+  res.status(200).send(JSON.stringify(the_match_id));
 });
 
 app.put('/match/:matchId', (req, res) => {
