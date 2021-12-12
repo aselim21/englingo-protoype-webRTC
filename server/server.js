@@ -73,12 +73,15 @@ app.get('/match/participant/:userId', (req,res)=>{
 
 // ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
 app.post('/participant', (req, res) => {
+  // logger.info(`POST-participant/${user_id} => ${match_id}`);
+  logger.info(`POST-/participant ${JSON.stringify(req.body)}`);
   const topic = req.body.topic;
   const user_id = req.body.userId;
-  Queues.getQueue(topic).addParticipant({
+  const result = Queues.getQueue(topic).addParticipant({
     user_id: user_id
   });
-  logger.info(`POST-participant/${user_id} => ${match_id}`);
+  console.log('Result =' + result);
+  // logger.info(`POST-participant => ${req.body}`);
   res.status(200).send();
 });
 
