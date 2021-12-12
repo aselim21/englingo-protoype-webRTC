@@ -27,6 +27,9 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/', (req, res) => {
+  res.send('Welcome to Englingo-Matches Service');
+});
 
 //----------------------LOGS-------------------
 //get all logs of the service
@@ -54,10 +57,9 @@ app.get('/logs', (req, res) => {
 
 // ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
 app.get('/match/:matchId', (req, res) => {
-  console.log('reading match info')
   const matchId = req.params.matchId;
   const the_match = Matches.getMatchInfo(matchId);
-  console.log(the_match)
+  logger.info(`GET-match/${matchId} => ${JSON.stringify(the_match)}`);
   res.status(200).send(JSON.stringify(the_match));
 });
 
@@ -65,6 +67,7 @@ app.get('/match/:matchId', (req, res) => {
 app.get('/match/participant/:userId', (req,res)=>{
     const user_id = req.params.userId;
     const match_id = Matches.findMyMatchID(user_id);
+    logger.info(`GET-match/participant/${user_id} => ${match_id}`);
     res.status(200).send(JSON.stringify(match_id));
 })
 
@@ -75,6 +78,7 @@ app.post('/participant', (req, res) => {
   Queues.getQueue(topic).addParticipant({
     user_id: user_id
   });
+  logger.info(`POST-participant/${user_id} => ${match_id}`);
   res.status(200).send();
 });
 
@@ -85,12 +89,15 @@ app.put('/match/:matchId', (req, res) => {
   if (req.body.user1_offer) {
     console.log("Its offer");
     result = Matches.updateMatchOffer(matchId, req.body);
+    logger.info(`PUT-match/${matchId}:OFFER => ${JSON.stringify(result)}`);
   } else if (req.body.user2_answer) {
     console.log("Its answer");
-    result = Matches.updateMatchAnswer(matchId, req.body)
+    result = Matches.updateMatchAnswer(matchId, req.body);
+    logger.info(`PUT-match/${matchId}:ANSWER => ${JSON.stringify(result)}`);
   } else if (req.body.connection_completed) {
     console.log("Its completed");
-    result = Matches.updateConnectionCompleted(matchId, req.body)
+    result = Matches.updateConnectionCompleted(matchId, req.body);
+    logger.info(`PUT-match/${matchId}:COMPLETE => ${JSON.stringify(result)}`);
   }
   res.status(200).send(JSON.stringify(result));
 });
@@ -98,7 +105,8 @@ app.put('/match/:matchId', (req, res) => {
 app.delete('/match/:matchId', (req, res) => {
   const matchId = req.params.matchId;
   Matches.deleteMatch(matchId);
-  res.status(200).send({});
+  logger.info(`DELETE-match/${matchId}`);
+  res.status(200).send();
 });
 
 
