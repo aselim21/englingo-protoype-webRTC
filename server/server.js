@@ -88,7 +88,6 @@ app.post('/participant', (req, res) => {
 app.put('/match/:matchId', (req, res) => {
   const matchId = req.params.matchId;
   let result;
-  console.log(req.body)
   if (req.body.user1_offer) {
     console.log("Its offer");
     result = Matches.updateMatchOffer(matchId, req.body);
@@ -207,11 +206,12 @@ const Matches = {
     return -1;
   },
   updateMatchOffer: function (the_match_id, data) {
+    logger.info (`updateMatchOffer : ${the_match_id}, ${JSON.stringify(data)}`);
     const index = this.elements.findIndex((m) => m.match_id == the_match_id);
-    console.log(this.elements[index]);
+    logger.info(`updateMatchOffer : Index = ${this.elements[index]}`);
     if (index > -1) {
       this.elements[index].user1_offer = data.user1_offer;
-      console.log(this.elements[index])
+      logger.info(`updateMatchOffer : Updated = ${this.elements[index]}`);
       return this.elements[index];
     }
     return -1;
