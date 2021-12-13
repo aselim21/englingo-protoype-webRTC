@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
-const path = require('path');
 const logger = require('./logger');
 app.use(express.json());
 app.use(express.static("src"));
@@ -238,11 +237,23 @@ const Matches = {
   }
 };
 
-//Define 1 Topic
+//Define 1st Topic
 const topic1Queue = Object.create(Queue);
-topic1Queue.topic = "Topic1";
+topic1Queue.topic = "books";
 topic1Queue.participants = [];
 Queues.addQueue(topic1Queue);
+
+//Define 2nd Topic
+const topic2Queue = Object.create(Queue);
+topic2Queue.topic = "family";
+topic2Queue.participants = [];
+Queues.addQueue(topic2Queue);
+
+//Define 3rd Topic
+const topic3Queue = Object.create(Queue);
+topic3Queue.topic = "relationships";
+topic3Queue.participants = [];
+Queues.addQueue(topic3Queue);
 
 //Constantly generate Matches for a topic
 function constantlyGenerateMatches(the_topic) {
@@ -252,8 +263,9 @@ function constantlyGenerateMatches(the_topic) {
   }, 5000);
 }
 //Start generation Matches for Topic 1
-constantlyGenerateMatches('Topic1');
-
+constantlyGenerateMatches('books');
+constantlyGenerateMatches('family');
+constantlyGenerateMatches('relationships');
 
 
 //connect with DB and start the server
