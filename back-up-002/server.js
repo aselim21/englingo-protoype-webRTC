@@ -52,6 +52,7 @@ app.get('/matches/participants/:userId', (req,res)=>{
 
 // ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
 app.post('/participant', (req, res) => {
+  
   const topic = req.body.topic;
   const user_id = req.body.userId;
   const result = Queues.getQueue(topic).addParticipant({
@@ -64,6 +65,7 @@ app.post('/participant', (req, res) => {
 app.put('/matches/:matchId', (req, res) => {
   const matchId = req.params.matchId;
   let result;
+
   if (req.body.user1_offer) {
     result = Matches.updateMatchOffer(matchId, req.body);
     logger.info(`PUT-matches/${matchId}:OFFER => ${JSON.stringify(result)}`);
@@ -74,6 +76,7 @@ app.put('/matches/:matchId', (req, res) => {
     result = Matches.updateConnectionCompleted(matchId, req.body);
     logger.info(`PUT-matches/${matchId}:COMPLETE => ${JSON.stringify(result)}`);
   }
+
   res.status(200).send(JSON.stringify(result));
 });
 
@@ -257,12 +260,13 @@ function constantlyGenerateMatches(the_topic) {
   setTimeout(function () {
     Matches.generateMatches(the_topic);
     constantlyGenerateMatches(the_topic);
-  }, 1000);
+  }, 5000);
 }
 //Start generation Matches for Topic 1
 constantlyGenerateMatches('books');
 constantlyGenerateMatches('family');
 constantlyGenerateMatches('relationships');
+
 
 //connect with DB and start the server
 mongoose.connect(MongodbURI, { useNewUrlParser: true, useUnifiedTopology: true })

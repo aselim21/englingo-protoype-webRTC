@@ -1,11 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
+const path = require('path');
 const logger = require('./logger');
 app.use(express.json());
 app.use(express.static("src"));
 const MongodbURI = "mongodb+srv://englingo-admin:admin123@cluster0.enlfp.mongodb.net/englingo-matches?retryWrites=true&w=majority";
-const Log = require('./models/log-model.js');
+const Log = require('./models/log_model.js');
 const { v4: uuidv4 } = require("uuid");
 const PORT = process.env.PORT || 3000;
 
@@ -13,8 +14,7 @@ app.use((req, res, next) => {
   const corsWhitelist = [
     'https://webrtc-englingo.herokuapp.com',
     'http://127.0.0.1:3000',
-    'http://localhost:3000',
-    'https://englingo.herokuapp.com'
+    'http://localhost:3000'
   ];
   if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
     res.header('Access-Control-Allow-Origin', req.headers.origin);
@@ -26,62 +26,23 @@ app.use((req, res, next) => {
   next();
 });
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~Matches~~~~~~~~~~~~~~~~~~~~~~~~~~
-app.get('/', (req, res) => {
-  res.send('Welcome to Englingo-Matches Service');
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~RESTful Service - Methods~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+app.get('/myIP', (req, res) => {
+    res.send(process.env);
 });
 
-app.get('/matches', (req, res) => {
-  const matches = {matches:Matches.elements}
-  res.status(200).send(matches);
+app.get('/home', (req, res) => {
+  res.sendFile(path.join(__dirname, '../src', 'index.html'));
+
+});
+app.get('/room', (req, res) => {
+  res.sendFile(path.join(__dirname, '../src', 'room.html'));
 });
 
-// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
-app.get('/matches/:matchId', (req, res) => {
-  const matchId = req.params.matchId;
-  const the_match = Matches.getMatchInfo(matchId);
-  res.status(200).send(JSON.stringify(the_match));
-});
-
-// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
-app.get('/matches/participants/:userId', (req,res)=>{
-    const user_id = req.params.userId;
-    const match_id = Matches.findMyMatchID(user_id);
-    res.status(200).send(JSON.stringify(match_id));
-})
-
-// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
-app.post('/participant', (req, res) => {
-  const topic = req.body.topic;
-  const user_id = req.body.userId;
-  const result = Queues.getQueue(topic).addParticipant({
-    user_id: user_id
-  });
-  logger.info(`POST-participant => ${JSON.stringify(req.body)}`);
-  res.status(200).send();
-});
-
-app.put('/matches/:matchId', (req, res) => {
-  const matchId = req.params.matchId;
-  let result;
-  if (req.body.user1_offer) {
-    result = Matches.updateMatchOffer(matchId, req.body);
-    logger.info(`PUT-matches/${matchId}:OFFER => ${JSON.stringify(result)}`);
-  } else if (req.body.user2_answer) {
-    result = Matches.updateMatchAnswer(matchId, req.body);
-    logger.info(`PUT-matches/${matchId}:ANSWER => ${JSON.stringify(result)}`);
-  } else if (req.body.connection_completed) {
-    result = Matches.updateConnectionCompleted(matchId, req.body);
-    logger.info(`PUT-matches/${matchId}:COMPLETE => ${JSON.stringify(result)}`);
-  }
-  res.status(200).send(JSON.stringify(result));
-});
-
-app.delete('/matches/:matchId', (req, res) => {
-  const matchId = req.params.matchId;
-  Matches.deleteMatch(matchId);
-  logger.info(`DELETE-matches/${matchId}`);
-  res.status(200).send();
+app.get('/room/:roomId', (req, res) => {
+  res.sendFile(path.join(__dirname, '../src', 'room.html'));
 });
 
 //----------------------LOGS-------------------
@@ -95,6 +56,61 @@ app.get('/logs', (req, res) => {
           logger.error(err);
       })
 })
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~Matches~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+app.get('/match', (req, res) => {
+  const the_topic = req.body.topic;
+  const the_user_id = req.body.userId;
+  Queues.getQueue(the_topic).addParticipant({
+    user_id: req.body.userId
+  });
+  const match_offer = Matches.getMyMatch(the_user_id);
+  res.status(200).send(JSON.stringify(match_offer));
+});
+
+app.get('/match/:matchId', (req, res) => {
+  console.log('reading match info')
+  const matchId = req.params.matchId;
+  const the_match = Matches.getMatchInfo(matchId);
+  console.log(the_match)
+  res.status(200).send(JSON.stringify(the_match));
+});
+
+app.post('/match', (req, res) => {
+
+  const the_topic = req.body.topic;
+  const the_user_id = req.body.userId;
+  Queues.getQueue(the_topic).addParticipant({
+    user_id: req.body.userId
+  });
+  const the_match_id = Matches.findMyMatchID(the_user_id);
+  res.status(200).send(JSON.stringify(the_match_id));
+});
+
+app.put('/match/:matchId', (req, res) => {
+  const matchId = req.params.matchId;
+  let result;
+  console.log(req.body)
+  if (req.body.user1_offer) {
+    console.log("Its offer");
+    result = Matches.updateMatchOffer(matchId, req.body);
+  } else if (req.body.user2_answer) {
+    console.log("Its answer");
+    result = Matches.updateMatchAnswer(matchId, req.body)
+  } else if (req.body.connection_completed) {
+    console.log("Its completed");
+    result = Matches.updateConnectionCompleted(matchId, req.body)
+  }
+  res.status(200).send(JSON.stringify(result));
+});
+
+app.delete('/match/:matchId', (req, res) => {
+  const matchId = req.params.matchId;
+  Matches.deleteMatch(matchId);
+  res.status(200).send({});
+});
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Queue for a topic~~~~~~~~~~~~~~~~~~~~~~~~~~
 const Queue = {
@@ -121,7 +137,6 @@ const Queue = {
   print: function () {
     console.log("-------------------QUEUE-------------------")
     console.log(JSON.stringify(this));
-    return this;
   }
 };
 
@@ -138,9 +153,15 @@ const Queues = {
   print: function () {
     console.log("-------------------QUEUES-------------------")
     console.log(JSON.stringify(this));
-    return this;
   }
 }
+
+//Define only 1 Topic
+const topic1Queue = Object.create(Queue);
+topic1Queue.topic = "Topic1";
+topic1Queue.participants = [];
+Queues.addQueue(topic1Queue);
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Matches~~~~~~~~~~~~~~~~~~~~~~~~~~
 const Matches = {
@@ -186,8 +207,10 @@ const Matches = {
   },
   updateMatchOffer: function (the_match_id, data) {
     const index = this.elements.findIndex((m) => m.match_id == the_match_id);
+    console.log(this.elements[index]);
     if (index > -1) {
       this.elements[index].user1_offer = data.user1_offer;
+      console.log(this.elements[index])
       return this.elements[index];
     }
     return -1;
@@ -230,39 +253,55 @@ const Matches = {
   print: function () {
     console.log("-------------------MATCHES-------------------");
     console.log(JSON.stringify(this));
-    return this;
   }
 };
-
-//Define 1st Topic
-const topic1Queue = Object.create(Queue);
-topic1Queue.topic = "books";
-topic1Queue.participants = [];
-Queues.addQueue(topic1Queue);
-
-//Define 2nd Topic
-const topic2Queue = Object.create(Queue);
-topic2Queue.topic = "family";
-topic2Queue.participants = [];
-Queues.addQueue(topic2Queue);
-
-//Define 3rd Topic
-const topic3Queue = Object.create(Queue);
-topic3Queue.topic = "relationships";
-topic3Queue.participants = [];
-Queues.addQueue(topic3Queue);
 
 //Constantly generate Matches for a topic
 function constantlyGenerateMatches(the_topic) {
   setTimeout(function () {
     Matches.generateMatches(the_topic);
     constantlyGenerateMatches(the_topic);
-  }, 1000);
+  }, 5000);
 }
 //Start generation Matches for Topic 1
-constantlyGenerateMatches('books');
-constantlyGenerateMatches('family');
-constantlyGenerateMatches('relationships');
+constantlyGenerateMatches('Topic1');
+
+
+//zeroMQ
+
+const zmq = require("zeromq");
+myIP = require('my-ip');
+// const pullSock = zmq.socket('pull');
+//'tcp://'+process.argv[3]+':3000'
+const pushSock = zmq.socket('push');
+const zmqAddress = 'tcp://'+""+':'+PORT;
+const zmqAddress_local = 'tcp://127.0.0.1:'+PORT;
+const zqmAddress_heroku = 'tcp://webrtc-englingo.herokuapp.com:'+PORT;
+
+// pushSock.bindSync(zmqAddress_local);
+
+//console.log("Producer bound to port ");
+
+
+setInterval(function() {
+  console.log("~~Message Sent~~");
+  pushSock.send('~~~~~Message from Zero~~~~');
+ 
+}, 6000);
+
+
+// console.log(zmqAddress);// return internal IPv4
+
+// console.log(process.argv[0])
+
+
+//IP heroku
+
+
+
+// app.listen(PORT, () => {
+//   console.log(`Express server listening on port ${PORT}`);
+// });
 
 //connect with DB and start the server
 mongoose.connect(MongodbURI, { useNewUrlParser: true, useUnifiedTopology: true })
