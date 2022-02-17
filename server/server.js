@@ -4,14 +4,17 @@ const app = express();
 const logger = require('./logger');
 app.use(express.json());
 app.use(express.static("src"));
-const MongodbURI = process.env.DATABASE_URL;
+const MongodbURI = "mongodb+srv://englingo-admin:admin123@cluster0.enlfp.mongodb.net/englingo-matches?retryWrites=true&w=majority";
 const Log = require('./models/log-model.js');
 const { v4: uuidv4 } = require("uuid");
 const PORT = process.env.PORT || 3000;
-const serverURL_Englingo = process.env.ENGLINGO_URL;
+
 app.use((req, res, next) => {
   const corsWhitelist = [
-    serverURL_Englingo
+    'https://webrtc-englingo.herokuapp.com',
+    'http://127.0.0.1:3000',
+    'http://localhost:3000',
+    'https://englingo.herokuapp.com'
   ];
   if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
     res.header('Access-Control-Allow-Origin', req.headers.origin);
@@ -23,32 +26,31 @@ app.use((req, res, next) => {
   next();
 });
 
-//-----------------------------Matches-----------------------------
+//~~~~~~~~~~~~~~~~~~~~~~~~~~Matches~~~~~~~~~~~~~~~~~~~~~~~~~~
 app.get('/', (req, res) => {
   res.send('Welcome to Englingo-Matches Service');
 });
 
-//returns all the matches
 app.get('/matches', (req, res) => {
-  const matches = { matches: Matches.elements }
+  const matches = {matches:Matches.elements}
   res.status(200).send(matches);
 });
 
-//returns info for a specific matchID
+// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
 app.get('/matches/:matchId', (req, res) => {
   const matchId = req.params.matchId;
   const the_match = Matches.getMatchInfo(matchId);
   res.status(200).send(JSON.stringify(the_match));
 });
 
-//returns matchID for the userID
-app.get('/matches/participants/:userId', (req, res) => {
-  const user_id = req.params.userId;
-  const match_id = Matches.findMyMatchID(user_id);
-  res.status(200).send(JSON.stringify(match_id));
+// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
+app.get('/matches/participants/:userId', (req,res)=>{
+    const user_id = req.params.userId;
+    const match_id = Matches.findMyMatchID(user_id);
+    res.status(200).send(JSON.stringify(match_id));
 })
 
-//creates a new participant entry
+// ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
 app.post('/participant', (req, res) => {
   const topic = req.body.topic;
   const user_id = req.body.userId;
@@ -59,7 +61,6 @@ app.post('/participant', (req, res) => {
   res.status(200).send();
 });
 
-//updates the matchInfo of a specific matchID, the signaling is done here
 app.put('/matches/:matchId', (req, res) => {
   const matchId = req.params.matchId;
   let result;
@@ -83,16 +84,16 @@ app.delete('/matches/:matchId', (req, res) => {
   res.status(200).send();
 });
 
-//-----------------------------LOGS-----------------------------
-//returns all logs of the service
+//----------------------LOGS-------------------
+//get all logs of the service
 app.get('/logs', (req, res) => {
   Log.find()
-    .then((result) => {
-      res.send(result);
-    }).catch(err => {
-      res.status(400).json("Error: " + err);
-      logger.error(err);
-    })
+      .then((result) => {
+          res.send(result);
+      }).catch(err => {
+          res.status(400).json("Error: " + err);
+          logger.error(err);
+      })
 })
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Queue for a topic~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -145,6 +146,7 @@ const Queues = {
 const Matches = {
   elements: [],
   generateMatches: function (the_topic) {
+    console.log(Queues.getQueue(the_topic))
     if (Queues.getQueue(the_topic).participants.length == 1) {
       return -1;
     }
@@ -161,6 +163,7 @@ const Matches = {
           user2_answer: null,
           connection_completed: false
         }
+        console.log(new_match);
         this.elements.push(new_match);
         Queues.getQueue(the_topic).removeParticipant(participant1.user_id);
         Queues.getQueue(the_topic).removeParticipant(participant2.user_id);
@@ -168,6 +171,7 @@ const Matches = {
     }
   },
   findMyMatchID: function (the_user_id) {
+    console.log("find match ID for user " + the_user_id);
     const index = this.elements.findIndex((m) => m.user1_id == the_user_id || m.user2_id == the_user_id);
     if (index > -1) {
       return this.elements[index].match_id;
@@ -189,17 +193,21 @@ const Matches = {
     return -1;
   },
   updateMatchAnswer: function (the_match_id, data) {
+    console.log('updating match answer')
     const index = this.elements.findIndex((m) => m.match_id == the_match_id);
     if (index > -1) {
       this.elements[index].user2_answer = data.user2_answer;
+      console.log(this.elements[index]);
       return this.elements[index];
     }
     return -1;
   },
   updateConnectionCompleted: function (the_match_id, data) {
     const index = this.elements.findIndex((m) => m.match_id == the_match_id);
+    console.log(this.elements[index]);
     if (index > -1) {
       this.elements[index].connection_completed = data.connection_completed;
+      console.log(this.elements[index]);
       return this.elements[index];
     }
     return -1;
@@ -258,10 +266,10 @@ constantlyGenerateMatches('relationships');
 
 //connect with DB and start the server
 mongoose.connect(MongodbURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then((result) => app.listen(PORT, () => {
-    logger.info(`Listening on port ${PORT}...`);
-  }))
-  .catch(err => {
-    logger.error(err);
-    res.status(400).json("Error: " + err)
-  });
+    .then((result) => app.listen(PORT, () => {
+        logger.info(`Listening on port ${PORT}...`);
+    }))
+    .catch(err => {
+        logger.error(err);
+        res.status(400).json("Error: " + err)
+    });

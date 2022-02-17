@@ -2,16 +2,20 @@ const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
 const path = require('path');
-const logger = require('../server/logger');
+const logger = require('./logger');
 app.use(express.json());
 app.use(express.static("src"));
-const MongodbURI = process.env.DATABASE_URL;
+const MongodbURI = "mongodb+srv://englingo-admin:admin123@cluster0.enlfp.mongodb.net/englingo-matches?retryWrites=true&w=majority";
 const Log = require('./models/log_model.js');
 const { v4: uuidv4 } = require("uuid");
 const PORT = process.env.PORT || 3000;
 
 app.use((req, res, next) => {
-  const corsWhitelist = [];
+  const corsWhitelist = [
+    'https://webrtc-englingo.herokuapp.com',
+    'http://127.0.0.1:3000',
+    'http://localhost:3000'
+  ];
   if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
     res.header('Access-Control-Allow-Origin', req.headers.origin);
   }
@@ -22,10 +26,11 @@ app.use((req, res, next) => {
   next();
 });
 
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~RESTful Service - Methods~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 app.get('/myIP', (req, res) => {
-  res.send(process.env);
+    res.send(process.env);
 });
 
 app.get('/home', (req, res) => {
@@ -44,12 +49,12 @@ app.get('/room/:roomId', (req, res) => {
 //get all logs of the service
 app.get('/logs', (req, res) => {
   Log.find()
-    .then((result) => {
-      res.send(result);
-    }).catch(err => {
-      res.status(400).json("Error: " + err);
-      logger.error(err);
-    })
+      .then((result) => {
+          res.send(result);
+      }).catch(err => {
+          res.status(400).json("Error: " + err);
+          logger.error(err);
+      })
 })
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Matches~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -269,19 +274,19 @@ myIP = require('my-ip');
 // const pullSock = zmq.socket('pull');
 //'tcp://'+process.argv[3]+':3000'
 const pushSock = zmq.socket('push');
-const zmqAddress = 'tcp://' + "" + ':' + PORT;
-const zmqAddress_local = 'tcp://127.0.0.1:' + PORT;
-const zqmAddress_heroku = 'tcp://webrtc-englingo.herokuapp.com:' + PORT;
+const zmqAddress = 'tcp://'+""+':'+PORT;
+const zmqAddress_local = 'tcp://127.0.0.1:'+PORT;
+const zqmAddress_heroku = 'tcp://webrtc-englingo.herokuapp.com:'+PORT;
 
 // pushSock.bindSync(zmqAddress_local);
 
 //console.log("Producer bound to port ");
 
 
-setInterval(function () {
+setInterval(function() {
   console.log("~~Message Sent~~");
   pushSock.send('~~~~~Message from Zero~~~~');
-
+ 
 }, 6000);
 
 
@@ -300,10 +305,10 @@ setInterval(function () {
 
 //connect with DB and start the server
 mongoose.connect(MongodbURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then((result) => app.listen(PORT, () => {
-    logger.info(`Listening on port ${PORT}...`);
-  }))
-  .catch(err => {
-    logger.error(err);
-    res.status(400).json("Error: " + err)
-  });
+    .then((result) => app.listen(PORT, () => {
+        logger.info(`Listening on port ${PORT}...`);
+    }))
+    .catch(err => {
+        logger.error(err);
+        res.status(400).json("Error: " + err)
+    });
