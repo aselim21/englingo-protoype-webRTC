@@ -9,22 +9,27 @@ const Log = require('./models/log-model.js');
 const { v4: uuidv4 } = require("uuid");
 const PORT = process.env.PORT || 3000;
 
-app.use((req, res, next) => {
-  const corsWhitelist = [
-    'https://webrtc-englingo.herokuapp.com',
-    'http://127.0.0.1:3000',
-    'http://localhost:3000',
-    'https://englingo.herokuapp.com'
-  ];
-  if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
-    res.header('Access-Control-Allow-Origin', req.headers.origin);
-  }
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept,Access-Control-Allow-Headers, Access-Control-Allow-Credentials, Access-Control-Allow-Methods, Cookie, Set-Cookie, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS, HEAD');
-  next();
-});
+const cors = require('cors')
+const corsOptions = {
+  origin: ["https://englingo.herokuapp.com", "https://englingo-missions.herokuapp.com", "https://englingo-evaluation.herokuapp.com", "https://webrtc-englingo.herokuapp.com"]
+};
+app.use(cors(corsOptions));
+// app.use((req, res, next) => {
+//   const corsWhitelist = [
+//     'https://webrtc-englingo.herokuapp.com',
+//     'http://127.0.0.1:3000',
+//     'http://localhost:3000',
+//     'https://englingo.herokuapp.com'
+//   ];
+//   if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
+//     res.header('Access-Control-Allow-Origin', req.headers.origin);
+//   }
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept,Access-Control-Allow-Headers, Access-Control-Allow-Credentials, Access-Control-Allow-Methods, Cookie, Set-Cookie, Authorization');
+//   res.header('Access-Control-Allow-Credentials', 'true');
+//   res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS, HEAD');
+//   next();
+// });
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Matches~~~~~~~~~~~~~~~~~~~~~~~~~~
 app.get('/', (req, res) => {
