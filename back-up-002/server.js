@@ -4,17 +4,14 @@ const app = express();
 const logger = require('./logger');
 app.use(express.json());
 app.use(express.static("src"));
-const MongodbURI = "mongodb+srv://englingo-admin:admin123@cluster0.enlfp.mongodb.net/englingo-matches?retryWrites=true&w=majority";
+const MongodbURI = process.env.DATABASE_URL;
 const Log = require('./models/log-model.js');
 const { v4: uuidv4 } = require("uuid");
 const PORT = process.env.PORT || 3000;
-
+const serverURL_Englingo = process.env.ENGLINGO_URL;
 app.use((req, res, next) => {
   const corsWhitelist = [
-    'https://webrtc-englingo.herokuapp.com',
-    'http://127.0.0.1:3000',
-    'http://localhost:3000',
-    'https://englingo.herokuapp.com'
+    serverURL_Englingo
   ];
   if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
     res.header('Access-Control-Allow-Origin', req.headers.origin);
