@@ -5,13 +5,17 @@ const path = require('path');
 const logger = require('./logger');
 app.use(express.json());
 app.use(express.static("src"));
-const MongodbURI = process.env.DATABASE_URL;
+const MongodbURI = "mongodb+srv://englingo-admin:admin123@cluster0.enlfp.mongodb.net/englingo-matches?retryWrites=true&w=majority";
 const Log = require('./models/log_model.js');
 const { v4: uuidv4 } = require("uuid");
 const PORT = process.env.PORT || 3000;
 
 app.use((req, res, next) => {
-  const corsWhitelist = [];
+  const corsWhitelist = [
+    'https://webrtc-englingo.herokuapp.com',
+    'http://127.0.0.1:3000',
+    'http://localhost:3000'
+  ];
   if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
     res.header('Access-Control-Allow-Origin', req.headers.origin);
   }
