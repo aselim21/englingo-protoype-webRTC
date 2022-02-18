@@ -151,7 +151,6 @@ const Queues = {
 const Matches = {
   elements: [],
   generateMatches: function (the_topic) {
-    console.log(Queues.getQueue(the_topic))
     if (Queues.getQueue(the_topic).participants.length == 1) {
       return -1;
     }
@@ -168,7 +167,6 @@ const Matches = {
           user2_answer: null,
           connection_completed: false
         }
-        console.log(new_match);
         this.elements.push(new_match);
         Queues.getQueue(the_topic).removeParticipant(participant1.user_id);
         Queues.getQueue(the_topic).removeParticipant(participant2.user_id);
@@ -176,7 +174,6 @@ const Matches = {
     }
   },
   findMyMatchID: function (the_user_id) {
-    console.log("find match ID for user " + the_user_id);
     const index = this.elements.findIndex((m) => m.user1_id == the_user_id || m.user2_id == the_user_id);
     if (index > -1) {
       return this.elements[index].match_id;
@@ -198,21 +195,17 @@ const Matches = {
     return -1;
   },
   updateMatchAnswer: function (the_match_id, data) {
-    console.log('updating match answer')
     const index = this.elements.findIndex((m) => m.match_id == the_match_id);
     if (index > -1) {
       this.elements[index].user2_answer = data.user2_answer;
-      console.log(this.elements[index]);
       return this.elements[index];
     }
     return -1;
   },
   updateConnectionCompleted: function (the_match_id, data) {
     const index = this.elements.findIndex((m) => m.match_id == the_match_id);
-    console.log(this.elements[index]);
     if (index > -1) {
       this.elements[index].connection_completed = data.connection_completed;
-      console.log(this.elements[index]);
       return this.elements[index];
     }
     return -1;
