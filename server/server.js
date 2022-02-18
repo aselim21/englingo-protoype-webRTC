@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 const cors = require('cors')
 const corsOptions = {
-  origin: ["https://englingo.herokuapp.com", "https://englingo-missions.herokuapp.com", "https://englingo-evaluation.herokuapp.com", "https://webrtc-englingo.herokuapp.com", "http://localhost:3000", "http://127.0.0.1:3000"]
+  origin: ["https://englingo.herokuapp.com", "https://englingo-missions.herokuapp.com", "https://englingo-evaluation.herokuapp.com", "https://webrtc-englingo.herokuapp.com"]
 };
 app.use(cors(corsOptions));
 // app.use((req, res, next) => {
@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/matches', (req, res) => {
-  const matches = { matches: Matches.elements }
+  const matches = {matches:Matches.elements}
   res.status(200).send(matches);
 });
 
@@ -49,10 +49,10 @@ app.get('/matches/:matchId', (req, res) => {
 });
 
 // ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
-app.get('/matches/participants/:userId', (req, res) => {
-  const user_id = req.params.userId;
-  const match_id = Matches.findMyMatchID(user_id);
-  res.status(200).send(JSON.stringify(match_id));
+app.get('/matches/participants/:userId', (req,res)=>{
+    const user_id = req.params.userId;
+    const match_id = Matches.findMyMatchID(user_id);
+    res.status(200).send(JSON.stringify(match_id));
 })
 
 // ~~~~~~~~~~~~~~~~~refactored~~~~~~~~~~~~~~~~~
@@ -93,12 +93,12 @@ app.delete('/matches/:matchId', (req, res) => {
 //get all logs of the service
 app.get('/logs', (req, res) => {
   Log.find()
-    .then((result) => {
-      res.send(result);
-    }).catch(err => {
-      res.status(400).json("Error: " + err);
-      logger.error(err);
-    })
+      .then((result) => {
+          res.send(result);
+      }).catch(err => {
+          res.status(400).json("Error: " + err);
+          logger.error(err);
+      })
 })
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Queue for a topic~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -271,10 +271,10 @@ constantlyGenerateMatches('relationships');
 
 //connect with DB and start the server
 mongoose.connect(MongodbURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then((result) => app.listen(PORT, () => {
-    logger.info(`Listening on port ${PORT}...`);
-  }))
-  .catch(err => {
-    logger.error(err);
-    res.status(400).json("Error: " + err)
-  });
+    .then((result) => app.listen(PORT, () => {
+        logger.info(`Listening on port ${PORT}...`);
+    }))
+    .catch(err => {
+        logger.error(err);
+        res.status(400).json("Error: " + err)
+    });
