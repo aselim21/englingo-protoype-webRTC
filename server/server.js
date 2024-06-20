@@ -88,8 +88,10 @@ app.get('/logs', (req, res) => {
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Queue for a topic~~~~~~~~~~~~~~~~~~~~~~~~~~
 const Queue = {
-  topic: '',
-  participants: [],
+  constructor(topic = '') {
+    this.topic = topic;
+    this.participants = [];
+  }
   addParticipant: function (new_participant) {
     const index = this.participants.findIndex((e) => e.user_id == new_participant.user_id);
     const userExists = Matches.userAlreadyMatched(new_participant.user_id);
@@ -110,31 +112,35 @@ const Queue = {
   },
   print: function () {
     console.log("-------------------QUEUE-------------------")
-    console.log(JSON.stringify(this));
+    console.log(JSON.stringify(this, null, 2)); // Pretty-print JSON with indentation
     return this;
   }
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Queues for different topics~~~~~~~~~~~~~~~~~~~~~~~~~~
 const Queues = {
-  elements: [],
+  constructor() {
+    this.elements = [];
+  }
   addQueue: function (new_queue) {
     this.elements.push(new_queue);
   },
   getQueue: function (the_topic) {
-    if (this.elements.length > -1) return this.elements.find(e => e.topic == the_topic);
+    return this.elements.find(e => e.topic === topic) || null;
     else return -1;
   },
   print: function () {
     console.log("-------------------QUEUES-------------------")
-    console.log(JSON.stringify(this));
+    console.log(JSON.stringify(this, null, 2)); // Pretty-print JSON with indentation
     return this;
   }
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~Matches~~~~~~~~~~~~~~~~~~~~~~~~~~
 const Matches = {
-  elements: [],
+   constructor() {
+    this.elements = [];
+  }
   generateMatches: function (the_topic) {
     if (Queues.getQueue(the_topic).participants.length == 1) {
       return -1;
@@ -209,6 +215,18 @@ const Matches = {
     if (index > -1) {
       return true;
     } else return false;
+  },
+  // method to get match statistics
+  getMatchStatistics() {
+    const totalMatches = this.elements.length;
+    const completedMatches = this.elements.filter(m => m.connection_completed).length;
+    const pendingMatches = totalMatches - completedMatches;
+    
+    return {
+      totalMatches,
+      completedMatches,
+      pendingMatches,
+    };
   },
   print: function () {
     console.log("-------------------MATCHES-------------------");
