@@ -216,6 +216,18 @@ const Matches = {
       return true;
     } else return false;
   },
+  // method to get match statistics
+  getMatchStatistics() {
+    const totalMatches = this.elements.length;
+    const completedMatches = this.elements.filter(m => m.connection_completed).length;
+    const pendingMatches = totalMatches - completedMatches;
+    
+    return {
+      totalMatches,
+      completedMatches,
+      pendingMatches,
+    };
+  },
   print: function () {
     console.log("-------------------MATCHES-------------------");
     console.log(JSON.stringify(this));
